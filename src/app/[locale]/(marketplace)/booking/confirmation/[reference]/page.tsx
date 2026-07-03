@@ -6,6 +6,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { CheckCircle2, Copy, ExternalLink } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { marketplaceApi } from "@/lib/api";
+import { useAuth } from "@/lib/auth/use-auth";
 import { BookingRecap } from "@/components/booking/booking-recap";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +21,7 @@ export default function BookingConfirmationPage({ params }: ConfirmationPageProp
   const { reference } = use(params);
   const t = useTranslations("booking");
   const locale = useLocale();
+  const { isAuthenticated } = useAuth();
   const [copied, setCopied] = useState(false);
 
   const email =
@@ -108,15 +110,29 @@ export default function BookingConfirmationPage({ params }: ConfirmationPageProp
           </Button>
         )}
 
-        <p className="text-center text-sm text-muted-foreground">{t("createAccountHint")}</p>
+        {!isAuthenticated && (
+          <p className="text-center text-sm text-muted-foreground">
+            {t("createAccountHint")}
+          </p>
+        )}
 
         <div className="flex gap-3">
           <Button variant="outline" className="flex-1" asChild>
             <Link href="/cars">{locale === "ar" ? "السيارات" : "Voir les voitures"}</Link>
           </Button>
-          <Button className="flex-1" asChild>
-            <Link href="/register">{locale === "ar" ? "إنشاء حساب" : "Créer un compte"}</Link>
-          </Button>
+          {isAuthenticated ? (
+            <Button className="flex-1" asChild>
+              <Link href="/account/bookings">
+                {locale === "ar" ? "حجوزاتي" : "Mes réservations"}
+              </Link>
+            </Button>
+          ) : (
+            <Button className="flex-1" asChild>
+              <Link href="/register">
+                {locale === "ar" ? "إنشاء حساب" : "Créer un compte"}
+              </Link>
+            </Button>
+          )}
         </div>
       </div>
     </div>

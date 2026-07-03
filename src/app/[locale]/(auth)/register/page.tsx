@@ -134,7 +134,7 @@ export default function RegisterPage() {
         phone: data.phone,
       });
       toast.success(t("registerSuccess"));
-      router.push("/login");
+      router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
     } catch (err) {
       toast.error(getErrorMessage(err));
     }

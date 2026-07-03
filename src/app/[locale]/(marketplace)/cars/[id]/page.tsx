@@ -122,15 +122,17 @@ function CarDetailContent({ params }: CarDetailPageProps) {
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="space-y-8 lg:col-span-2">
           <div className="overflow-hidden rounded-xl border bg-card">
-            <div className="relative aspect-[16/10] bg-muted">
-              <Image
-                src={photos[activePhoto]}
-                alt={`${car.brand} ${car.model}`}
-                fill
-                className="object-cover"
-                priority
-                sizes="(max-width: 1024px) 100vw, 66vw"
-              />
+            <div className="relative bg-muted/60 p-6 sm:p-8">
+              <div className="relative mx-auto aspect-[16/10] max-h-[380px] w-full">
+                <Image
+                  src={photos[activePhoto]}
+                  alt={`${car.brand} ${car.model}`}
+                  fill
+                  className="object-contain"
+                  priority
+                  sizes="(max-width: 1024px) 100vw, 66vw"
+                />
+              </div>
               {photos.length > 1 && (
                 <>
                   <Button

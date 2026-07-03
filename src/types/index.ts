@@ -100,10 +100,13 @@ export interface Agency {
 }
 
 export interface PickupLocation {
-  name: string;
+  name?: string;
+  city?: string;
   address: string;
   latitude?: number;
   longitude?: number;
+  lat?: number;
+  lng?: number;
 }
 
 export interface Car {
@@ -250,6 +253,24 @@ export interface AgencyUser {
   createdAt: string;
   updatedAt: string;
   user?: User;
+}
+
+export interface PlanChangeRequest {
+  id: string;
+  agencyId: string;
+  requestedById: string;
+  currentPlan: string;
+  requestedPlan: string;
+  monthlyPrice: number | string;
+  status: string;
+  note?: string | null;
+  adminNote?: string | null;
+  processedById?: string | null;
+  processedAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  agency?: Agency;
+  requestedBy?: User;
 }
 
 export interface StatsOverview {

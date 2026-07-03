@@ -8,7 +8,7 @@ const intlMiddleware = createMiddleware(routing);
 
 const protectedClientRoutes = ["/account"];
 const protectedDashboardRoutes = ["/dashboard"];
-const authRoutes = ["/login", "/register"];
+const authRoutes = ["/login", "/register", "/verify-email"];
 
 function decodeJwtAgencyId(token: string): string | undefined {
   try {

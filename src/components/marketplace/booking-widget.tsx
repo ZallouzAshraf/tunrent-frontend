@@ -15,6 +15,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  pickupLocationDisplay,
+  pickupLocationValue,
+} from "@/lib/pickup-location";
 import { formatPrice, daysBetween, cn } from "@/lib/utils";
 import type { Car } from "@/types";
 
@@ -38,8 +42,10 @@ export function BookingWidget({
 
   const [startDate, setStartDate] = useState(defaultStart ?? "");
   const [endDate, setEndDate] = useState(defaultEnd ?? "");
-  const [pickupLocation, setPickupLocation] = useState(
-    car.pickupLocations[0]?.name ?? "",
+  const [pickupLocation, setPickupLocation] = useState(() =>
+    car.pickupLocations[0]
+      ? pickupLocationValue(car.pickupLocations[0], 0)
+      : "",
   );
 
   const totalDays =
@@ -56,13 +62,19 @@ export function BookingWidget({
 
   const handleBook = () => {
     if (!canBook) return;
+    const selected = car.pickupLocations.find(
+      (loc, index) => pickupLocationValue(loc, index) === pickupLocation,
+    );
+    const locationLabel = selected
+      ? pickupLocationDisplay(selected)
+      : pickupLocation;
     setDraft({
       carId: car.id,
       car,
       startDate,
       endDate,
-      pickupLocation,
-      dropoffLocation: pickupLocation,
+      pickupLocation: locationLabel,
+      dropoffLocation: locationLabel,
       totalDays,
       totalPrice,
       depositAmount: deposit,
@@ -92,9 +104,12 @@ export function BookingWidget({
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {car.pickupLocations.map((loc) => (
-                  <SelectItem key={loc.name} value={loc.name}>
-                    {loc.name} — {loc.address}
+                {car.pickupLocations.map((loc, index) => (
+                  <SelectItem
+                    key={pickupLocationValue(loc, index)}
+                    value={pickupLocationValue(loc, index)}
+                  >
+                    {pickupLocationDisplay(loc)}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -77,6 +77,20 @@ export enum MarketplaceSort {
   RATING_DESC = "rating_desc",
 }
 
+export enum AgencyPlan {
+  FREE = "free",
+  STARTER = "starter",
+  PRO = "pro",
+  ENTERPRISE = "enterprise",
+}
+
+export enum PlanChangeRequestStatus {
+  PENDING = "pending",
+  APPROVED = "approved",
+  REJECTED = "rejected",
+  CANCELLED = "cancelled",
+}
+
 export enum Governorate {
   TUNIS = "tunis",
   ARIANA = "ariana",

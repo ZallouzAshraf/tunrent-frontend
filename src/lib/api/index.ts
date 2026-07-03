@@ -15,6 +15,7 @@ import type {
   Review,
   StatsOverview,
   User,
+  PlanChangeRequest,
 } from "@/types";
 
 // Auth
@@ -38,6 +39,8 @@ export const authApi = {
 
   logout: () => apiClient.post("/auth/logout"),
 
+  logoutAll: () => apiClient.post("/auth/logout-all"),
+
   me: () => apiClient.get<{ user: User; agencyId?: string; agencyRole?: string }>("/auth/me"),
 
   forgotPassword: (email: string) =>
@@ -46,7 +49,14 @@ export const authApi = {
   resetPassword: (token: string, password: string) =>
     apiClient.post("/auth/reset-password", { token, password }),
 
-  verifyEmail: (token: string) =>
+  verifyEmail: (email: string, code: string) =>
+    apiClient.post<{ message: string }>("/auth/verify-email", { email, code }),
+
+  resendVerification: (email: string) =>
+    apiClient.post<{ message: string }>("/auth/resend-verification", { email }),
+
+  /** @deprecated token link flow */
+  verifyEmailToken: (token: string) =>
     apiClient.get(`/auth/verify-email/${token}`),
 };
 
@@ -104,6 +114,24 @@ export const agencyApi = {
   get: () => apiClient.get<Agency>("/dashboard/agency"),
   update: (data: Record<string, unknown>) =>
     apiClient.put<Agency>("/dashboard/agency", data),
+};
+
+export const billingApi = {
+  getPlanRequests: () =>
+    apiClient.get<PlanChangeRequest[]>("/dashboard/billing/plan-requests"),
+  getPendingPlanRequest: () =>
+    apiClient.get<PlanChangeRequest | null>(
+      "/dashboard/billing/plan-requests/pending",
+    ),
+  requestPlanChange: (requestedPlan: string, note?: string) =>
+    apiClient.post<PlanChangeRequest>("/dashboard/billing/plan-requests", {
+      requestedPlan,
+      note,
+    }),
+  cancelPendingPlanRequest: () =>
+    apiClient.delete<PlanChangeRequest>(
+      "/dashboard/billing/plan-requests/pending",
+    ),
 };
 
 // Dashboard

@@ -112,8 +112,13 @@ export default function DashboardCalendarPage() {
               <tbody>
                 {cars.map((car) => (
                   <tr key={car.id}>
-                    <td className="border p-2 font-medium whitespace-nowrap">
-                      {car.brand} {car.model}
+                    <td className="border p-2 whitespace-nowrap">
+                      <p className="font-medium leading-tight">
+                        {car.brand} {car.model}
+                      </p>
+                      <p className="mt-0.5 font-mono text-[11px] text-muted-foreground">
+                        {car.registrationNumber}
+                      </p>
                     </td>
                     {days.map((day) => {
                       const booking = getBookingForCell(car.id, day);

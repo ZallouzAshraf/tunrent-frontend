@@ -17,7 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { authApi } from "@/lib/api";
-import { getErrorMessage } from "@/lib/api/client";
+import { getErrorMessage, isEmailNotVerifiedError } from "@/lib/api/client";
 import { setAgencyId } from "@/lib/api/client";
 import {
   setGlobalAccessToken,
@@ -98,6 +98,14 @@ export function AuthModal({
       const res = await authApi.login(values);
       await finishAuth(res.data.access_token);
     } catch (err) {
+      if (isEmailNotVerifiedError(err)) {
+        onOpenChange(false);
+        toast.error(t("verifyRequired"));
+        window.location.assign(
+          `/verify-email?email=${encodeURIComponent(values.email)}`,
+        );
+        return;
+      }
       toast.error(getErrorMessage(err));
     }
   };
@@ -111,11 +119,11 @@ export function AuthModal({
         password: values.password,
         phone: values.phone,
       });
-      const res = await authApi.login({
-        email: values.email,
-        password: values.password,
-      });
-      await finishAuth(res.data.access_token);
+      onOpenChange(false);
+      toast.success(t("registerSuccess"));
+      window.location.assign(
+        `/verify-email?email=${encodeURIComponent(values.email)}`,
+      );
     } catch (err) {
       toast.error(getErrorMessage(err));
     }

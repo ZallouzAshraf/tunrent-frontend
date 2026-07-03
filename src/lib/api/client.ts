@@ -89,3 +89,12 @@ export function getErrorMessage(error: unknown): string {
   if (error instanceof Error) return error.message;
   return "Une erreur est survenue";
 }
+
+export function isEmailNotVerifiedError(error: unknown): boolean {
+  if (!axios.isAxiosError(error)) return false;
+  const data = error.response?.data as { message?: string | string[] };
+  const message = Array.isArray(data?.message)
+    ? data.message.join(", ")
+    : data?.message;
+  return error.response?.status === 403 && message === "EMAIL_NOT_VERIFIED";
+}

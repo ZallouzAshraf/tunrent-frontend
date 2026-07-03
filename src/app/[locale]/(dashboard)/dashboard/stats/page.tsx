@@ -23,7 +23,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { dashboardApi } from "@/lib/api";
 import { formatPrice } from "@/lib/utils";
-import { CalendarDays, Car, DollarSign, TrendingUp } from "lucide-react";
+import { CalendarDays, DollarSign, TrendingUp, Users } from "lucide-react";
 
 export default function DashboardStatsPage() {
   const { data: stats, isLoading } = useQuery({
@@ -46,7 +46,7 @@ export default function DashboardStatsPage() {
       <div>
         <h1 className="text-2xl font-bold">Statistiques</h1>
         <p className="text-muted-foreground">
-          Analytics avancées — owner & manager
+          Analytics et tendances — performance de votre agence
         </p>
       </div>
 
@@ -61,21 +61,25 @@ export default function DashboardStatsPage() {
               title="Chiffre d'affaires"
               value={formatPrice(stats?.totalRevenue ?? 0)}
               icon={DollarSign}
+              description="Total encaissé"
             />
             <KpiCard
               title="Réservations totales"
               value={stats?.totalBookings ?? 0}
               icon={CalendarDays}
+              description="Toutes périodes"
             />
             <KpiCard
               title="Taux d'occupation"
               value={`${Math.round(stats?.occupancyRate ?? 0)}%`}
               icon={TrendingUp}
+              description="Flotte en location"
             />
             <KpiCard
-              title="Flotte active"
-              value={`${stats?.availableCars ?? 0}/${stats?.totalCars ?? 0}`}
-              icon={Car}
+              title="Locations actives"
+              value={stats?.activeBookings ?? 0}
+              icon={Users}
+              description="Confirmées + en cours"
             />
           </>
         )}

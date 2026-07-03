@@ -21,6 +21,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { daysBetween } from "@/lib/utils";
+import { pickupLocationDisplay } from "@/lib/pickup-location";
 
 interface BookingPageProps {
   params: Promise<{ carId: string }>;
@@ -73,8 +74,16 @@ function BookingPageContent({ params }: BookingPageProps) {
       car,
       startDate,
       endDate,
-      pickupLocation: draft?.pickupLocation ?? car.pickupLocations[0]?.name ?? "",
-      dropoffLocation: draft?.dropoffLocation ?? car.pickupLocations[0]?.name ?? "",
+      pickupLocation:
+        draft?.pickupLocation ??
+        (car.pickupLocations[0]
+          ? pickupLocationDisplay(car.pickupLocations[0])
+          : ""),
+      dropoffLocation:
+        draft?.dropoffLocation ??
+        (car.pickupLocations[0]
+          ? pickupLocationDisplay(car.pickupLocations[0])
+          : ""),
       totalDays,
       totalPrice,
       depositAmount: car.depositAmount ? Number(car.depositAmount) : undefined,

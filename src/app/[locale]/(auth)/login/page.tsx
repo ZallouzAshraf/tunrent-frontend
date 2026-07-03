@@ -24,8 +24,12 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "@/i18n/routing";
 import { useQueryClient } from "@tanstack/react-query";
-import { authApi, getErrorMessage } from "@/lib/api";
-import { setAgencyId } from "@/lib/api/client";
+import { authApi } from "@/lib/api";
+import {
+  getErrorMessage,
+  isEmailNotVerifiedError,
+  setAgencyId,
+} from "@/lib/api/client";
 import {
   setGlobalAccessToken,
   useAuthContext,
@@ -129,6 +133,13 @@ function ClientLoginForm({ redirectTo }: { redirectTo: string }) {
       toast.success(t("loginSuccess"));
       redirectAfterLogin(redirectTo || "/account");
     } catch (err) {
+      if (isEmailNotVerifiedError(err)) {
+        toast.error(t("verifyRequired"));
+        redirectAfterLogin(
+          `/verify-email?email=${encodeURIComponent(data.email)}`,
+        );
+        return;
+      }
       toast.error(getErrorMessage(err));
     }
   };
