@@ -1,0 +1,308 @@
+# PROMPT FRONTEND — TunRent (Plateforme SaaS Multi-Tenant de Location de Voitures, Tunisie)
+
+## Contexte & Stack
+
+Tu es un développeur Frontend senior (10 ans d'expérience) spécialisé en Next.js. Tu dois construire le frontend complet de **TunRent**, une plateforme de location de voitures en Tunisie, connectée à un backend NestJS existant (multi-tenant, `agency_id` comme discriminant).
+
+- **Framework** : Next.js 14+ (App Router) + TypeScript
+- **Styling** : TailwindCSS + shadcn/ui
+- **State/Data fetching** : TanStack Query (React Query) + Zustand (état global léger : session, panier de réservation)
+- **Formulaires** : React Hook Form + Zod
+- **Auth** : JWT (access token en mémoire/store, refresh token en cookie httpOnly géré côté backend)
+- **i18n** : Français (par défaut) + Arabe (RTL) — `next-intl` ou équivalent
+- **Cartes** : Leaflet ou Google Maps (localisation agences/points de retrait)
+- **Déploiement cible** : Vercel ou VPS avec Docker
+
+Le frontend couvre **3 espaces distincts** avec 3 layouts différents :
+
+1. **Landing Page** (`/`) — vitrine publique, marketing, SEO
+2. **Marketplace + Espace Client** (`/cars`, `/agencies`, `/booking`, `/account`) — public, avec ou sans compte
+3. **Dashboard Agence** (`/dashboard`) — privé, protégé, multi-rôle (owner/manager/agent)
+
+---
+
+## 1. Landing Page (`/`)
+
+Objectif : convertir le visiteur en recherche de voiture, et donner envie aux agences de s'inscrire.
+
+### Sections
+
+| Section | Contenu |
+|---|---|
+| Header | Logo TunRent, nav (Voitures, Agences, Comment ça marche, Devenir partenaire), CTA "Se connecter" / "Réserver" |
+| Hero | Barre de recherche rapide intégrée (ville, dates début/fin, CTA "Chercher") — redirige vers `/cars?params` |
+| Réassurance | 3-4 badges : "Sans engagement", "Paiement sécurisé (Flouci/D17)", "Agences vérifiées", "Support 7j/7" |
+| Voitures populaires | Carousel de 8-10 voitures (les mieux notées / les plus réservées), carte cliquable → détail |
+| Comment ça marche | 3 étapes illustrées : Cherchez → Réservez → Récupérez la voiture |
+| Agences partenaires | Grille logos + lien "Voir toutes les agences" |
+| Par gouvernorat | Grille des 24 gouvernorats avec nombre de voitures dispo, cliquable |
+| Avis clients | Carousel de reviews (note globale + commentaire + nom + agence) |
+| CTA Agences | Bloc "Vous êtes une agence de location ?" → `/devenir-partenaire` → formulaire d'inscription agence |
+| Footer | Liens légaux (CGU, CGV, Confidentialité), réseaux sociaux, contact, langues |
+
+### Pages annexes landing
+- `/comment-ca-marche`
+- `/devenir-partenaire` (formulaire inscription agence → crée `agency` avec status `pending_validation`)
+- `/a-propos`, `/contact`, `/cgu`, `/confidentialite`
+
+**SEO** : SSR/ISR obligatoire sur landing + fiches voitures/agences (métadonnées dynamiques, sitemap.xml, JSON-LD `Product`/`LocalBusiness`).
+
+---
+
+## 2. Marketplace + Espace Client
+
+### 2.1 Recherche & Listing (`/cars`)
+
+```
+/cars?governorate=tunis&category=suv&start_date=2026-07-10&end_date=2026-07-15
+     &min_price=50&max_price=200&transmission=automatic&has_ac=true&seats=5
+     &sort=price_asc&page=1
+```
+
+**Layout** : sidebar filtres (desktop) / drawer filtres (mobile) + grille de résultats.
+
+Filtres :
+- Dates (date range picker avec vérification dispo en temps réel)
+- Gouvernorat (select avec recherche)
+- Catégorie (chips : economy, compact, suv, sedan, luxury, van, pickup, convertible)
+- Prix (slider min/max)
+- Transmission, carburant, nombre de places
+- Équipements (checkboxes : clim, GPS, bluetooth, siège enfant)
+- Tri : prix croissant/décroissant, mieux notées
+
+**Card voiture** (résultat) :
+- Photo principale, marque + modèle, badge catégorie
+- Note agence (étoiles) + nb avis
+- Équipements clés en icônes
+- Prix/jour en TND, mention "dès X jours minimum"
+- Bouton "Voir détails"
+
+État vide : "Aucune voiture disponible pour ces critères" + suggestion d'élargir les dates/filtres.
+
+### 2.2 Détail voiture (`/cars/[id]`)
+
+- Galerie photos (lightbox, swipe mobile)
+- Infos complètes (specs techniques en grille d'icônes)
+- Bloc agence (logo, nom, note, lien vers `/agencies/[slug]`)
+- Calendrier de disponibilité (visuel, dates bloquées grisées)
+- **Widget de réservation sticky** (desktop : sidebar droite / mobile : bottom sheet) :
+  - Sélecteur dates début/fin
+  - Lieu de prise en charge (dropdown des `pickup_locations`)
+  - Calcul prix en temps réel (jours × prix/jour, affichage caution)
+  - CTA "Réserver" → `/booking/[carId]?start=...&end=...`
+- Section avis clients (liste paginée + note moyenne détaillée par critère : état voiture / service / rapport qualité-prix)
+
+### 2.3 Agences (`/agencies`, `/agencies/[slug]`)
+
+- Liste : grille de cards agence (logo, nom, ville, note, nb voitures dispo) avec filtre par gouvernorat
+- Profil agence : cover + logo, description, coordonnées, note globale, carte de localisation, grille de ses voitures dispo, avis reçus
+
+### 2.4 Tunnel de réservation (`/booking/[carId]`)
+
+**Étape unique ou en 2-3 steps (stepper)** :
+
+1. **Récapitulatif** : voiture, dates, lieu, prix total
+2. **Informations client** :
+   - Si connecté → pré-rempli depuis le profil
+   - Si non connecté → 2 choix clairement affichés en haut :
+     - **"Réserver sans compte"** (guest) → formulaire : prénom, nom, email, téléphone, CIN (optionnel), permis (optionnel)
+     - **"Se connecter / Créer un compte"** → modal ou redirection avec retour au tunnel (params préservés en query/state)
+3. **Confirmation** : récap final, CGV à cocher, bouton "Envoyer la demande de réservation"
+
+⚠️ Important : la réservation crée un statut `pending` — bien afficher un message "Votre demande a été envoyée à l'agence, vous recevrez une confirmation par email" (pas de paiement immédiat obligatoire, selon logique métier backend).
+
+**Page de confirmation** (`/booking/confirmation/[reference]`) :
+- Numéro de référence (ex: LOC-2026-00042), affiché en gros, copiable
+- Récap complet
+- Pour un guest : mention "Consultez le statut de votre demande via ce lien : `/booking/track?ref=...&email=...`"
+
+**Suivi sans compte** (`/booking/track`) :
+- Formulaire simple : référence + email → affiche le statut de la réservation
+
+### 2.5 Espace Client connecté (`/account`)
+
+Protégé par auth (JWT client). Layout avec sidebar :
+
+```
+/account                    → Vue d'ensemble (prochaine résa, stats rapides)
+/account/bookings           → Historique complet, filtrable par statut
+/account/bookings/[id]      → Détail résa + bouton annulation (si éligible J-2)
+/account/profile            → Éditer infos perso (nom, tel, avatar)
+/account/documents          → Upload/gestion CIN + permis de conduire
+/account/reviews            → Avis laissés, possibilité d'en ajouter après résa terminée
+/account/notifications      → Liste notifications in-app
+/account/security           → Changer mot de passe
+```
+
+### 2.6 Auth (pages partagées client + agence)
+
+- `/login` — email + mdp, lien "mot de passe oublié"
+- `/register` — création compte client (prénom, nom, email, tel, mdp, confirmation CGU)
+- `/forgot-password`, `/reset-password/[token]`
+- `/verify-email/[token]`
+- Modales de login/register réutilisables pour ne pas interrompre le tunnel de réservation
+
+---
+
+## 3. Dashboard Agence (`/dashboard`)
+
+Protégé : `JwtAuthGuard` + vérification `agencyRole`. Layout avec sidebar navigation + topbar (nom agence, notifications, avatar user).
+
+### Navigation sidebar (selon rôle)
+
+```
+Tous rôles :
+  /dashboard                     → Vue d'ensemble (stats clés, résa récentes, alertes)
+  /dashboard/cars                → Liste voitures (table + vue grille)
+  /dashboard/cars/new            → Créer voiture (formulaire multi-step : infos, specs, photos, tarifs)
+  /dashboard/cars/[id]           → Éditer voiture
+  /dashboard/bookings            → Liste résa (kanban par statut OU table filtrable)
+  /dashboard/bookings/[id]       → Détail résa + actions (confirmer/rejeter/démarrer/terminer/annuler)
+  /dashboard/calendar            → Vue calendrier global (toutes voitures × réservations, type Gantt)
+  /dashboard/availability        → Gestion blocages manuels par voiture
+  /dashboard/payments            → Liste paiements + enregistrement paiement manuel (cash)
+  /dashboard/reviews             → Avis reçus + réponse
+  /dashboard/notifications       → Centre de notifications
+
+Owner + Manager :
+  /dashboard/stats               → Analytics avancées (CA, taux occupation, top voitures — graphes)
+
+Owner seulement :
+  /dashboard/team                → Gestion équipe (inviter, changer rôle, suspendre)
+  /dashboard/settings/agency      → Profil agence (logo, description, coordonnées)
+  /dashboard/settings/billing     → Plan actuel, upgrade
+```
+
+### Composants clés
+
+**Vue d'ensemble (`/dashboard`)**
+- 4 cards KPI : résa en attente, CA du mois, taux d'occupation, note moyenne
+- Graphe résa par mois (recharts)
+- Liste "Actions requises" : résa en `pending` à traiter en priorité
+- Timeline activité récente
+
+**Liste voitures**
+- Table avec colonnes : photo miniature, marque/modèle, immat, catégorie, prix/jour, statut (badge coloré), actions
+- Filtres : statut, catégorie
+- Action rapide changement de statut (available/maintenance/inactive) en inline
+
+**Formulaire voiture (create/edit)**
+- Step 1 : infos générales (marque, modèle, année, immat, VIN)
+- Step 2 : specs (catégorie, transmission, carburant, places, équipements en checkboxes)
+- Step 3 : tarifs (prix/jour, prix/semaine, caution, jours min, âge min conducteur)
+- Step 4 : photos (upload multiple, drag & drop, réordonnable, définir thumbnail)
+- Step 5 : lieux de prise en charge (liste dynamique adresse + carte)
+- Validation Zod stricte, sauvegarde brouillon possible
+
+**Kanban réservations** (`/dashboard/bookings`)
+- Colonnes : Pending → Confirmed → In Progress → Completed (+ Rejected/Cancelled en filtre séparé)
+- Card résa : client, voiture, dates, prix — drag & drop OU boutons d'action explicites (préférable pour audit trail)
+- Détail résa : toutes les infos + notes internes agence + historique des changements de statut
+
+**Calendrier global**
+- Vue type planning (lignes = voitures, colonnes = jours), zoom semaine/mois
+- Couleur par statut de résa, hover = tooltip détail
+- Clic sur case vide = créer un blocage manuel rapide
+
+**Gestion équipe**
+- Table membres (nom, email, rôle, statut, date d'ajout)
+- Modal "Inviter un membre" (email + rôle) → envoie invitation
+- Changement de rôle en inline (select), suspension avec confirmation
+
+---
+
+## 4. Design System
+
+- **Palette** : à définir selon identité TunRent — suggestion : bleu/rouge (drapeau tunisien) désaturés pour un rendu pro, ou vert/or. Éviter le générique "bleu SaaS #2563eb" par défaut de shadcn — personnaliser les tokens Tailwind.
+- **Typographie** : une police claire supportant les caractères arabes si RTL activé (ex: Inter + Noto Sans Arabic).
+- **Composants réutilisables** : Button, Input, Select, DatePicker/DateRangePicker, Badge (statuts), Card, Modal, Toast (notifications), Table (avec tri/pagination), Stepper, FileUpload (drag&drop), StarRating, EmptyState, Skeleton loaders partout où il y a fetch.
+- **Responsive** : mobile-first obligatoire sur landing + marketplace (c'est là que sont les visiteurs). Dashboard peut être desktop-first mais doit rester utilisable sur tablette.
+- **Accessibilité** : contrastes AA, focus visible, aria-labels sur les actions icône-only.
+
+---
+
+## 5. Gestion des rôles/permissions côté frontend
+
+```typescript
+// Exemple de garde de route dashboard
+type AgencyRole = 'owner' | 'manager' | 'agent';
+
+const ROUTE_PERMISSIONS: Record<string, AgencyRole[]> = {
+  '/dashboard/team': ['owner'],
+  '/dashboard/settings/agency': ['owner'],
+  '/dashboard/stats': ['owner', 'manager'],
+  // routes non listées = accessibles à tous les rôles connectés
+};
+```
+
+Masquer aussi les actions UI (boutons) selon le rôle, en plus du blocage de route — ne jamais se fier uniquement au frontend pour la sécurité (le backend doit re-vérifier).
+
+---
+
+## 6. Gestion du parcours "invité vs compte" (point critique UX)
+
+Le tunnel de réservation doit gérer 3 cas sans friction :
+
+1. **Visiteur non connecté** qui choisit "Réserver sans compte" → formulaire guest, aucune redirection, aucune création de compte forcée.
+2. **Visiteur non connecté** qui choisit "Se connecter" → modal de login/register en overlay, **sans perdre l'état du tunnel** (voiture + dates + lieu conservés en state global Zustand ou query params), retour automatique à l'étape suivante après connexion.
+3. **Client déjà connecté** → étape infos client sautée/pré-remplie automatiquement.
+
+Après une réservation guest, proposer en fin de tunnel (soft, non bloquant) : *"Créez un compte pour suivre toutes vos réservations facilement"* avec pré-remplissage email/nom déjà saisis.
+
+---
+
+## 7. Intégration API & état
+
+- **TanStack Query** pour tout le data fetching (cache, invalidation après mutations : ex. invalider `bookings` après confirmation)
+- **Zustand** pour : session utilisateur courant, panier de réservation en cours (avant soumission), préférences de filtres
+- **Intercepteur Axios/fetch** : refresh automatique du access token à expiration (retry silencieux), déconnexion propre si refresh échoue
+- Variables d'environnement : `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME`, etc.
+
+---
+
+## 8. Packages NPM à installer
+
+```bash
+# Core
+npm i next react react-dom typescript
+
+# UI
+npm i tailwindcss @tailwindcss/forms class-variance-authority clsx tailwind-merge
+npx shadcn-ui@latest init
+
+# Data & état
+npm i @tanstack/react-query zustand axios
+
+# Formulaires
+npm i react-hook-form zod @hookform/resolvers
+
+# UI complémentaire
+npm i lucide-react recharts date-fns react-day-picker embla-carousel-react
+
+# i18n
+npm i next-intl
+
+# Cartes
+npm i leaflet react-leaflet
+```
+
+---
+
+## Génère dans cet ordre
+
+1. Setup projet (Next.js + Tailwind + shadcn) + design tokens personnalisés
+2. Layouts (landing, marketplace/client, dashboard) + composants UI de base
+3. Auth (login/register/forgot/reset) + store Zustand session + intercepteur refresh token
+4. Landing Page complète
+5. Marketplace : listing + filtres + détail voiture
+6. Tunnel de réservation (guest + connecté)
+7. Espace client (`/account/*`)
+8. Dashboard agence : vue d'ensemble + CRUD voitures
+9. Dashboard agence : réservations (kanban + détail) + calendrier
+10. Dashboard agence : équipe, paiements, avis, stats, settings
+11. Notifications (in-app, temps réel si websocket dispo côté backend, sinon polling)
+12. i18n FR/AR + passes responsive/accessibilité finales
+
+---
+
+*Commence par me demander des précisions si tu en as besoin, sinon génère tout dans l'ordre indiqué avec des fichiers TypeScript/TSX complets et fonctionnels.*

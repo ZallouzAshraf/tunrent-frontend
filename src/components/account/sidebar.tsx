@@ -1,0 +1,98 @@
+"use client";
+
+import {
+  Bell,
+  CalendarDays,
+  Car,
+  FileText,
+  LayoutDashboard,
+  LogOut,
+  Shield,
+  Star,
+  User,
+} from "lucide-react";
+import { Link, usePathname } from "@/i18n/routing";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth/use-auth";
+import { useLogout } from "@/lib/auth/use-logout";
+
+const navItems = [
+  { href: "/account", label: "Vue d'ensemble", icon: LayoutDashboard },
+  { href: "/account/bookings", label: "Mes réservations", icon: CalendarDays },
+  { href: "/account/profile", label: "Profil", icon: User },
+  { href: "/account/documents", label: "Documents", icon: FileText },
+  { href: "/account/reviews", label: "Mes avis", icon: Star },
+  { href: "/account/notifications", label: "Notifications", icon: Bell },
+  { href: "/account/security", label: "Sécurité", icon: Shield },
+];
+
+export function AccountSidebar() {
+  const pathname = usePathname();
+  const { user } = useAuth();
+  const logout = useLogout();
+
+  const handleLogout = () => logout();
+
+  return (
+    <aside className="flex w-full flex-col lg:w-64 lg:shrink-0">
+      <div className="rounded-xl border bg-card p-4 shadow-sm">
+        <div className="mb-4 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold">
+            {user?.firstName?.[0]}
+            {user?.lastName?.[0]}
+          </div>
+          <div className="min-w-0">
+            <p className="truncate font-medium">
+              {user?.firstName} {user?.lastName}
+            </p>
+            <p className="truncate text-xs text-muted-foreground">
+              {user?.email}
+            </p>
+          </div>
+        </div>
+        <Separator className="mb-3" />
+        <nav className="space-y-1">
+          {navItems.map(({ href, label, icon: Icon }) => {
+            const active =
+              href === "/account"
+                ? pathname === "/account"
+                : pathname.startsWith(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                  active
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                )}
+              >
+                <Icon className="h-4 w-4" />
+                {label}
+              </Link>
+            );
+          })}
+        </nav>
+        <Separator className="my-3" />
+        <Button
+          variant="ghost"
+          className="w-full justify-start gap-3 text-muted-foreground"
+          onClick={handleLogout}
+        >
+          <LogOut className="h-4 w-4" />
+          Déconnexion
+        </Button>
+      </div>
+      <Link
+        href="/cars"
+        className="mt-4 flex items-center gap-2 rounded-lg border border-dashed p-3 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors"
+      >
+        <Car className="h-4 w-4" />
+        Louer une voiture
+      </Link>
+    </aside>
+  );
+}
