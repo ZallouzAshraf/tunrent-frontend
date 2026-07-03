@@ -144,7 +144,10 @@
       "agencies": "Agences",
       "howItWorks": "Comment ça marche",
       "becomePartner": "Devenir partenaire",
-      "about": "À propos"
+      "about": "À propos",
+      "myAccount": "Mon compte",
+      "dashboard": "Tableau de bord",
+      "agencyBadge": "Agence"
     },
     "footer": {
       "tagline": "La plateforme de location de voitures en Tunisie",
@@ -205,9 +208,16 @@
     },
     "partners": {
       "title": "Agences partenaires",
-      "subtitle": "Des professionnels de confiance",
+      "subtitle": "Des professionnels vérifiés, partout en Tunisie",
+      "badge": "Partenaires vérifiés",
       "viewAll": "Voir toutes les agences",
-      "empty": "Aucune agence"
+      "viewAgency": "Voir l'agence",
+      "verified": "Vérifiée",
+      "featured": "À la une",
+      "newPartner": "Nouveau partenaire",
+      "prev": "Précédent",
+      "next": "Suivant",
+      "empty": "Aucune agence disponible pour le moment"
     },
     "governorates": {
       "title": "Par gouvernorat",
@@ -217,6 +227,10 @@
     "reviews": {
       "title": "Avis clients",
       "subtitle": "Ce que disent nos utilisateurs",
+      "badge": "Avis vérifiés",
+      "verifiedClient": "Vérifié",
+      "statsLabel": "Moyenne sur {count} témoignages",
+      "goToReview": "Aller à l'avis",
       "prev": "Précédent",
       "next": "Suivant"
     },

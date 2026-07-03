@@ -2,7 +2,8 @@
 
 import { Bell } from "lucide-react";
 import { Link } from "@/i18n/routing";
-import { Button } from "@/components/ui/button";
+import { NotificationUnreadBadge } from "@/components/dashboard/notification-unread-badge";
+import { useUnreadNotificationsCount } from "@/lib/dashboard/use-dashboard-notifications";
 import { useAuth } from "@/lib/auth/use-auth";
 import { AgencyUserRole } from "@/types";
 
@@ -14,31 +15,44 @@ const roleLabels: Record<AgencyUserRole, string> = {
 
 export function DashboardTopbar() {
   const { user, agencyRole } = useAuth();
+  const unreadCount = useUnreadNotificationsCount();
 
   return (
-    <header className="flex h-16 items-center justify-between border-b bg-card px-4 lg:px-6">
-      <div>
-        <h2 className="text-sm font-medium text-muted-foreground">
-          Espace agence
-        </h2>
-        <p className="text-lg font-semibold">
-          Bonjour, {user?.firstName}
-        </p>
-      </div>
-      <div className="flex items-center gap-3">
-        {agencyRole && (
-          <span className="hidden sm:inline-flex rounded-full bg-secondary px-3 py-1 text-xs font-medium text-primary">
-            {roleLabels[agencyRole]}
-          </span>
-        )}
-        <Link href="/dashboard/notifications">
-          <Button variant="ghost" size="icon" aria-label="Notifications">
+    <header className="sticky top-0 z-40 hidden border-b border-black/[0.06] bg-[#F2F2F7]/80 px-6 py-4 backdrop-blur-2xl lg:block">
+      <div className="flex items-center justify-between gap-4">
+        <div>
+          <p className="text-sm font-medium text-muted-foreground">
+            Bonjour, {user?.firstName}
+          </p>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Tableau de bord
+          </h2>
+        </div>
+
+        <div className="flex items-center gap-3">
+          {agencyRole && (
+            <span className="inline-flex rounded-full border border-black/[0.06] bg-white/80 px-3.5 py-1.5 text-xs font-semibold text-primary shadow-sm">
+              {roleLabels[agencyRole]}
+            </span>
+          )}
+
+          <Link
+            href="/dashboard/notifications"
+            className="relative flex h-11 w-11 items-center justify-center rounded-2xl border border-black/[0.06] bg-white/80 text-foreground shadow-sm transition-transform active:scale-95 hover:bg-white"
+            aria-label={
+              unreadCount > 0
+                ? `Notifications, ${unreadCount} non lue${unreadCount > 1 ? "s" : ""}`
+                : "Notifications"
+            }
+          >
             <Bell className="h-5 w-5" />
-          </Button>
-        </Link>
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-          {user?.firstName?.[0]}
-          {user?.lastName?.[0]}
+            <NotificationUnreadBadge count={unreadCount} variant="dot" />
+          </Link>
+
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground shadow-[0_4px_12px_rgba(30,58,95,0.22)]">
+            {user?.firstName?.[0]}
+            {user?.lastName?.[0]}
+          </div>
         </div>
       </div>
     </header>

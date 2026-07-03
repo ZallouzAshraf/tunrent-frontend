@@ -4,25 +4,26 @@ import { useQuery } from "@tanstack/react-query";
 import {
   AlertCircle,
   Calendar,
+  Banknote,
   CalendarDays,
   Car,
   CarFront,
   ChevronRight,
   Clock,
-  DollarSign,
+  Sparkles,
   Star,
 } from "lucide-react";
 import { Link } from "@/i18n/routing";
+import {
+  DashboardEmptyState,
+  DashboardListRow,
+  DashboardPageHeader,
+  DashboardPanel,
+  DashboardPanelHeader,
+} from "@/components/dashboard/dashboard-ui";
 import { KpiCard } from "@/components/dashboard/kpi-card";
 import { StatusBadge } from "@/components/dashboard/status-badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { agencyApi, dashboardApi } from "@/lib/api";
 import { formatDate, formatPrice } from "@/lib/utils";
@@ -34,18 +35,21 @@ const QUICK_ACTIONS = [
     label: "Ajouter une voiture",
     description: "Enrichir votre flotte",
     icon: CarFront,
+    tint: "bg-blue-500/10 text-blue-700",
   },
   {
     href: "/dashboard/bookings",
-    label: "Gérer les réservations",
-    description: "Valider ou suivre les demandes",
+    label: "Réservations",
+    description: "Valider les demandes",
     icon: CalendarDays,
+    tint: "bg-violet-500/10 text-violet-700",
   },
   {
     href: "/dashboard/calendar",
-    label: "Ouvrir le calendrier",
-    description: "Vue planning de la flotte",
+    label: "Calendrier",
+    description: "Planning de la flotte",
     icon: Calendar,
+    tint: "bg-emerald-500/10 text-emerald-700",
   },
 ] as const;
 
@@ -89,18 +93,16 @@ export default function DashboardOverviewPage() {
   const upcomingBookings = upcomingData?.data ?? [];
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Vue d&apos;ensemble</h1>
-        <p className="text-muted-foreground">
-          Votre cockpit opérationnel — alertes et actions du jour
-        </p>
-      </div>
+    <div className="space-y-6 lg:space-y-8">
+      <DashboardPageHeader
+        title="Vue d'ensemble"
+        description="Votre cockpit opérationnel — alertes et actions du jour"
+      />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {statsLoading ? (
           Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} className="h-28" />
+            <Skeleton key={i} className="h-36 rounded-[1.25rem]" />
           ))
         ) : (
           <>
@@ -109,6 +111,7 @@ export default function DashboardOverviewPage() {
               value={stats?.pendingBookings ?? 0}
               icon={AlertCircle}
               description="Réservations en attente"
+              accent="warning"
               trend={
                 (stats?.pendingBookings ?? 0) > 0
                   ? { value: "Action requise", positive: false }
@@ -120,169 +123,164 @@ export default function DashboardOverviewPage() {
               value={stats?.activeBookings ?? 0}
               icon={Clock}
               description="Confirmées ou en location"
+              accent="default"
             />
             <KpiCard
               title="CA encaissé"
               value={formatPrice(stats?.totalRevenue ?? 0)}
-              icon={DollarSign}
+              icon={Banknote}
               description="Paiements complétés"
+              accent="success"
             />
             <KpiCard
               title="Flotte dispo"
               value={`${stats?.availableCars ?? 0}/${stats?.totalCars ?? 0}`}
               icon={Car}
               description="Voitures disponibles"
+              accent="gold"
             />
           </>
         )}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-3">
-        {QUICK_ACTIONS.map(({ href, label, description, icon: Icon }) => (
+        {QUICK_ACTIONS.map(({ href, label, description, icon: Icon, tint }) => (
           <Link
             key={href}
             href={href}
-            className="group flex items-center gap-3 rounded-xl border bg-card p-4 transition-colors hover:border-primary/30 hover:bg-muted/30"
+            className="group flex items-center gap-3 rounded-[1.25rem] border border-black/[0.04] bg-white p-4 shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_rgba(0,0,0,0.04)] transition-all hover:-translate-y-0.5 hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)] active:scale-[0.99]"
           >
-            <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-              <Icon className="size-5" />
+            <div
+              className={`flex size-11 shrink-0 items-center justify-center rounded-2xl ${tint}`}
+            >
+              <Icon className="size-5" aria-hidden />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold">{label}</p>
-              <p className="text-xs text-muted-foreground">{description}</p>
+              <p className="text-[15px] font-semibold">{label}</p>
+              <p className="text-sm text-muted-foreground">{description}</p>
             </div>
-            <ChevronRight className="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+            <ChevronRight className="size-4 shrink-0 text-muted-foreground/50 transition-transform group-hover:translate-x-0.5" />
           </Link>
         ))}
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <AlertCircle className="size-5 text-accent" />
-                Actions requises
-              </CardTitle>
-              <CardDescription>Réservations à valider en priorité</CardDescription>
+      <div className="grid gap-5 lg:grid-cols-2">
+        <DashboardPanel padding="compact">
+          <DashboardPanelHeader
+            title="Actions requises"
+            description="Réservations à valider en priorité"
+            icon={AlertCircle}
+            iconClassName="bg-red-500/10"
+            action={
+              <Link href="/dashboard/bookings">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full border-black/[0.08] bg-white"
+                >
+                  Voir tout
+                </Button>
+              </Link>
+            }
+          />
+          {pendingLoading ? (
+            <Skeleton className="h-40 rounded-2xl" />
+          ) : pendingBookings.length === 0 ? (
+            <DashboardEmptyState
+              icon={Sparkles}
+              title="Tout est à jour"
+              description="Aucune réservation en attente de validation"
+            />
+          ) : (
+            <div className="divide-y divide-black/[0.05] rounded-2xl bg-[#F2F2F7]/70">
+              {pendingBookings.map((b) => (
+                <DashboardListRow
+                  key={b.id}
+                  href={`/dashboard/bookings/${b.id}`}
+                  title={`${b.clientFirstName} ${b.clientLastName}`}
+                  subtitle={`${b.car?.brand} ${b.car?.model} · ${formatDate(b.startDate)}`}
+                  trailing={<StatusBadge status={b.status} type="booking" />}
+                />
+              ))}
             </div>
-            <Link href="/dashboard/bookings">
-              <Button variant="outline" size="sm">
-                Voir tout
-              </Button>
-            </Link>
-          </CardHeader>
-          <CardContent>
-            {pendingLoading ? (
-              <Skeleton className="h-40" />
-            ) : pendingBookings.length === 0 ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">
-                Aucune réservation en attente — tout est à jour
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {pendingBookings.map((b) => (
-                  <Link
-                    key={b.id}
-                    href={`/dashboard/bookings/${b.id}`}
-                    className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
-                  >
-                    <div>
-                      <p className="text-sm font-medium">
-                        {b.clientFirstName} {b.clientLastName}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {b.car?.brand} {b.car?.model} · {formatDate(b.startDate)}
-                      </p>
-                    </div>
-                    <StatusBadge status={b.status} type="booking" />
-                  </Link>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          )}
+        </DashboardPanel>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between">
-            <div>
-              <CardTitle className="flex items-center gap-2">
-                <CalendarDays className="size-5 text-primary" />
-                Prochains départs
-              </CardTitle>
-              <CardDescription>Réservations confirmées à venir</CardDescription>
+        <DashboardPanel padding="compact">
+          <DashboardPanelHeader
+            title="Prochains départs"
+            description="Réservations confirmées à venir"
+            icon={CalendarDays}
+            action={
+              <Link href="/dashboard/calendar">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="rounded-full border-black/[0.08] bg-white"
+                >
+                  Calendrier
+                </Button>
+              </Link>
+            }
+          />
+          {upcomingLoading ? (
+            <Skeleton className="h-40 rounded-2xl" />
+          ) : upcomingBookings.length === 0 ? (
+            <DashboardEmptyState
+              icon={CalendarDays}
+              title="Aucun départ prévu"
+              description="Les prochaines locations confirmées apparaîtront ici"
+            />
+          ) : (
+            <div className="divide-y divide-black/[0.05] rounded-2xl bg-[#F2F2F7]/70">
+              {upcomingBookings.map((b) => (
+                <DashboardListRow
+                  key={b.id}
+                  href={`/dashboard/bookings/${b.id}`}
+                  title={`${b.car?.brand} ${b.car?.model}`}
+                  subtitle={`${b.clientFirstName} ${b.clientLastName} · ${formatDate(b.startDate)}`}
+                  trailing={<StatusBadge status={b.status} type="booking" />}
+                />
+              ))}
             </div>
-            <Link href="/dashboard/calendar">
-              <Button variant="outline" size="sm">
-                Calendrier
-              </Button>
-            </Link>
-          </CardHeader>
-          <CardContent>
-            {upcomingLoading ? (
-              <Skeleton className="h-40" />
-            ) : upcomingBookings.length === 0 ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">
-                Aucun départ planifié prochainement
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {upcomingBookings.map((b) => (
-                  <Link
-                    key={b.id}
-                    href={`/dashboard/bookings/${b.id}`}
-                    className="flex items-center justify-between rounded-lg border p-3 transition-colors hover:bg-muted/50"
-                  >
-                    <div>
-                      <p className="text-sm font-medium">
-                        {b.car?.brand} {b.car?.model}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {b.clientFirstName} {b.clientLastName} ·{" "}
-                        {formatDate(b.startDate)}
-                      </p>
-                    </div>
-                    <StatusBadge status={b.status} type="booking" />
-                  </Link>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
+          )}
+        </DashboardPanel>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Star className="size-5 text-[var(--tunrent-gold)]" />
-            Réputation agence
-          </CardTitle>
-          <CardDescription>
-            Note moyenne sur la marketplace
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex flex-wrap items-end justify-between gap-4">
+      <DashboardPanel>
+        <DashboardPanelHeader
+          title="Réputation agence"
+          description="Note moyenne sur la marketplace"
+          icon={Star}
+          iconClassName="bg-[var(--tunrent-gold)]/20"
+          action={
+            <Link href="/dashboard/stats">
+              <Button
+                variant="outline"
+                size="sm"
+                className="rounded-full border-black/[0.08] bg-white"
+              >
+                Statistiques
+              </Button>
+            </Link>
+          }
+        />
+        <div className="flex flex-wrap items-end gap-4">
           {agencyLoading ? (
-            <Skeleton className="h-10 w-24" />
+            <Skeleton className="h-12 w-32 rounded-2xl" />
           ) : (
-            <p className="text-3xl font-bold text-primary">
-              {Number(agency?.avgRating ?? 0).toFixed(1)}
-              <span className="text-base font-normal text-muted-foreground">
-                {" "}
-                / 5
-              </span>
-              <span className="ms-3 text-sm font-normal text-muted-foreground">
-                ({agency?.totalReviews ?? 0} avis)
-              </span>
-            </p>
+            <div className="flex items-baseline gap-2">
+              <p className="text-4xl font-bold tracking-tight text-primary tabular-nums">
+                {Number(agency?.avgRating ?? 0).toFixed(1)}
+              </p>
+              <p className="text-lg text-muted-foreground">/ 5</p>
+              <p className="ms-2 rounded-full bg-[#F2F2F7] px-3 py-1 text-sm text-muted-foreground">
+                {agency?.totalReviews ?? 0} avis
+              </p>
+            </div>
           )}
-          <Link href="/dashboard/stats">
-            <Button variant="outline" size="sm">
-              Voir les statistiques détaillées
-            </Button>
-          </Link>
-        </CardContent>
-      </Card>
+        </div>
+      </DashboardPanel>
     </div>
   );
 }

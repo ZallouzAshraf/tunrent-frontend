@@ -5,7 +5,11 @@ import { useTranslations, useLocale } from "next-intl";
 import { Menu, X, Globe } from "lucide-react";
 import { Link, usePathname, useRouter } from "@/i18n/routing";
 import { Logo } from "@/components/shared/logo";
-import { Button } from "@/components/ui/button";
+import {
+  LandingAuthActions,
+  LandingPrimaryCta,
+} from "@/components/landing/landing-user-menu";
+import { useAuth } from "@/lib/auth/use-auth";
 import { cn } from "@/lib/utils";
 
 const navLinks = [
@@ -23,6 +27,14 @@ export function Header() {
   const router = useRouter();
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const closeMobile = () => setMobileOpen(false);
+  const { isDashboard, isAuthenticated, isLoading } = useAuth();
+
+  const visibleNavLinks = navLinks.filter((link) => {
+    if (link.key !== "becomePartner") return true;
+    return !isDashboard && !(isAuthenticated && isLoading);
+  });
+
   const switchLocale = (newLocale: "fr" | "ar") => {
     router.replace(pathname, { locale: newLocale });
     setMobileOpen(false);
@@ -34,7 +46,7 @@ export function Header() {
         <Logo size="sm" />
 
         <nav className="hidden items-center gap-1 lg:flex" aria-label="Main">
-          {navLinks.map((link) => (
+          {visibleNavLinks.map((link) => (
             <Link
               key={link.key}
               href={link.href}
@@ -79,12 +91,8 @@ export function Header() {
             </button>
           </div>
 
-          <Button variant="ghost" size="sm" asChild>
-            <Link href="/login">{tCommon("login")}</Link>
-          </Button>
-          <Button size="sm" asChild>
-            <Link href="/cars">{tCommon("book")}</Link>
-          </Button>
+          <LandingAuthActions />
+          <LandingPrimaryCta />
         </div>
 
         <button
@@ -101,7 +109,7 @@ export function Header() {
       {mobileOpen && (
         <div className="border-t bg-background lg:hidden">
           <nav className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-4" aria-label="Mobile">
-            {navLinks.map((link) => (
+            {visibleNavLinks.map((link) => (
               <Link
                 key={link.key}
                 href={link.href}
@@ -143,17 +151,10 @@ export function Header() {
               </button>
             </div>
 
-            <div className="flex flex-col gap-2 px-4 pt-2">
-              <Button variant="outline" asChild>
-                <Link href="/login" onClick={() => setMobileOpen(false)}>
-                  {tCommon("login")}
-                </Link>
-              </Button>
-              <Button asChild>
-                <Link href="/cars" onClick={() => setMobileOpen(false)}>
-                  {tCommon("book")}
-                </Link>
-              </Button>
+            <LandingAuthActions variant="mobile" onNavigate={closeMobile} />
+
+            <div className="px-4 pt-2">
+              <LandingPrimaryCta variant="mobile" onNavigate={closeMobile} />
             </div>
           </nav>
         </div>

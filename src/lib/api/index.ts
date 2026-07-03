@@ -178,6 +178,8 @@ export const dashboardApi = {
     apiClient.patch<Booking>(`/dashboard/bookings/${id}/cancel`, {
       cancellationReason: reason,
     }),
+  markBookingPaidCash: (id: string) =>
+    apiClient.post<Booking>(`/dashboard/bookings/${id}/mark-paid-cash`),
 
   // Availability
   createBlock: (data: Record<string, unknown>) =>

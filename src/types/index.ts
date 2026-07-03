@@ -175,6 +175,7 @@ export interface Booking {
   updatedAt: string;
   car?: Car;
   agency?: Agency;
+  payments?: Payment[];
 }
 
 export interface PublicBookingStatus {

@@ -3,29 +3,18 @@
 import { use, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2 } from "lucide-react";
 import { Link } from "@/i18n/routing";
-import { StatusBadge } from "@/components/dashboard/status-badge";
+import {
+  BookingDetailPanel,
+  BookingDetailSkeleton,
+} from "@/components/dashboard/booking-detail-panel";
+import {
+  getBookingActionErrorMessage,
+  refreshBookingQueries,
+  syncBookingDetailCache,
+} from "@/lib/dashboard/booking-mutations";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Textarea } from "@/components/ui/textarea";
-import { dashboardApi, getErrorMessage } from "@/lib/api";
-import { formatDate, formatPrice } from "@/lib/utils";
-import { BookingStatus } from "@/types";
+import { dashboardApi } from "@/lib/api";
 
 export default function DashboardBookingDetailPage({
   params,
@@ -40,203 +29,119 @@ export default function DashboardBookingDetailPage({
   const { data: booking, isLoading } = useQuery({
     queryKey: ["dashboard", "bookings", id],
     queryFn: async () => (await dashboardApi.getBooking(id)).data,
+    refetchOnWindowFocus: true,
   });
 
-  const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: ["dashboard", "bookings"] });
+  const handleMutationSuccess = async (
+    response: Awaited<ReturnType<typeof dashboardApi.confirmBooking>>,
+    message: string,
+  ) => {
+    syncBookingDetailCache(queryClient, id, response);
+    await refreshBookingQueries(queryClient, id);
+    toast.success(message);
+  };
+
+  const handleMutationError = async (error: unknown) => {
+    await refreshBookingQueries(queryClient, id);
+    toast.error(getBookingActionErrorMessage(error));
+  };
 
   const confirmMutation = useMutation({
     mutationFn: () => dashboardApi.confirmBooking(id),
-    onSuccess: () => {
-      invalidate();
-      toast.success("Réservation confirmée");
-    },
-    onError: (e) => toast.error(getErrorMessage(e)),
+    onSuccess: (response) =>
+      handleMutationSuccess(response, "Réservation confirmée"),
+    onError: handleMutationError,
   });
 
   const rejectMutation = useMutation({
     mutationFn: () => dashboardApi.rejectBooking(id, rejectReason),
-    onSuccess: () => {
-      invalidate();
+    onSuccess: async (response) => {
+      syncBookingDetailCache(queryClient, id, response);
+      await refreshBookingQueries(queryClient, id);
       setRejectOpen(false);
+      setRejectReason("");
       toast.success("Réservation rejetée");
     },
-    onError: (e) => toast.error(getErrorMessage(e)),
+    onError: handleMutationError,
   });
 
   const startMutation = useMutation({
     mutationFn: () => dashboardApi.startBooking(id),
-    onSuccess: () => {
-      invalidate();
-      toast.success("Location démarrée");
-    },
-    onError: (e) => toast.error(getErrorMessage(e)),
+    onSuccess: (response) =>
+      handleMutationSuccess(response, "Location démarrée"),
+    onError: handleMutationError,
   });
 
   const completeMutation = useMutation({
     mutationFn: () => dashboardApi.completeBooking(id),
-    onSuccess: () => {
-      invalidate();
-      toast.success("Location terminée");
-    },
-    onError: (e) => toast.error(getErrorMessage(e)),
+    onSuccess: (response) =>
+      handleMutationSuccess(response, "Location terminée"),
+    onError: handleMutationError,
   });
 
   const cancelMutation = useMutation({
     mutationFn: () => dashboardApi.cancelBooking(id),
-    onSuccess: () => {
-      invalidate();
-      toast.success("Réservation annulée");
-    },
-    onError: (e) => toast.error(getErrorMessage(e)),
+    onSuccess: (response) =>
+      handleMutationSuccess(response, "Réservation annulée"),
+    onError: handleMutationError,
   });
 
-  if (isLoading) return <Skeleton className="h-96" />;
-  if (!booking) return <p>Réservation introuvable</p>;
+  const markPaidMutation = useMutation({
+    mutationFn: () => dashboardApi.markBookingPaidCash(id),
+    onSuccess: async (response) => {
+      syncBookingDetailCache(queryClient, id, response);
+      await refreshBookingQueries(queryClient, id);
+      await queryClient.invalidateQueries({ queryKey: ["dashboard", "payments"] });
+      await queryClient.invalidateQueries({ queryKey: ["dashboard", "stats"] });
+      toast.success("Paiement espèces enregistré — ajouté au CA");
+    },
+    onError: handleMutationError,
+  });
 
-  const pending = booking.status === BookingStatus.PENDING;
-  const confirmed = booking.status === BookingStatus.CONFIRMED;
-  const inProgress = booking.status === BookingStatus.IN_PROGRESS;
+  const isMutating =
+    confirmMutation.isPending ||
+    rejectMutation.isPending ||
+    startMutation.isPending ||
+    completeMutation.isPending ||
+    cancelMutation.isPending ||
+    markPaidMutation.isPending;
+
+  if (isLoading) return <BookingDetailSkeleton />;
+
+  if (!booking) {
+    return (
+      <div className="mx-auto max-w-lg py-16 text-center">
+        <p className="text-lg font-medium">Réservation introuvable</p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Cette réservation n&apos;existe pas ou a été supprimée.
+        </p>
+        <Button asChild className="mt-6">
+          <Link href="/dashboard/bookings">Retour aux réservations</Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6">
-      <Link
-        href="/dashboard/bookings"
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Retour
-      </Link>
-
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold font-mono">
-            {booking.bookingReference}
-          </h1>
-          <p className="text-muted-foreground">
-            {formatDate(booking.createdAt)}
-          </p>
-        </div>
-        <StatusBadge status={booking.status} type="booking" />
-      </div>
-
-      <div className="flex flex-wrap gap-2">
-        {pending && (
-          <>
-            <Button
-              onClick={() => confirmMutation.mutate()}
-              disabled={confirmMutation.isPending}
-            >
-              {confirmMutation.isPending && (
-                <Loader2 className="animate-spin" />
-              )}
-              Confirmer
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => setRejectOpen(true)}
-            >
-              Rejeter
-            </Button>
-          </>
-        )}
-        {confirmed && (
-          <Button
-            onClick={() => startMutation.mutate()}
-            disabled={startMutation.isPending}
-          >
-            Démarrer la location
-          </Button>
-        )}
-        {inProgress && (
-          <Button
-            onClick={() => completeMutation.mutate()}
-            disabled={completeMutation.isPending}
-          >
-            Terminer
-          </Button>
-        )}
-        {(pending || confirmed) && (
-          <Button
-            variant="outline"
-            onClick={() => cancelMutation.mutate()}
-            disabled={cancelMutation.isPending}
-          >
-            Annuler
-          </Button>
-        )}
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Client</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1 text-sm">
-            <p className="font-medium">
-              {booking.clientFirstName} {booking.clientLastName}
-            </p>
-            <p>{booking.clientEmail}</p>
-            <p>{booking.clientPhone}</p>
-            {booking.clientCin && <p>CIN : {booking.clientCin}</p>}
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Voiture & dates</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1 text-sm">
-            <p className="font-medium">
-              {booking.car?.brand} {booking.car?.model}
-            </p>
-            <p>
-              {formatDate(booking.startDate)} → {formatDate(booking.endDate)}
-            </p>
-            <p>{booking.totalDays} jour(s)</p>
-            <p className="font-semibold text-primary">
-              {formatPrice(booking.totalPrice)}
-            </p>
-          </CardContent>
-        </Card>
-        {booking.agencyNotes && (
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle>Notes internes</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm">{booking.agencyNotes}</p>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      <Dialog open={rejectOpen} onOpenChange={setRejectOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Rejeter la réservation</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-2">
-            <Label>Raison</Label>
-            <Textarea
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-              placeholder="Indisponibilité, documents manquants..."
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setRejectOpen(false)}>
-              Annuler
-            </Button>
-            <Button
-              variant="destructive"
-              disabled={!rejectReason || rejectMutation.isPending}
-              onClick={() => rejectMutation.mutate()}
-            >
-              Rejeter
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
+    <BookingDetailPanel
+      booking={booking}
+      rejectOpen={rejectOpen}
+      rejectReason={rejectReason}
+      onRejectOpenChange={setRejectOpen}
+      onRejectReasonChange={setRejectReason}
+      onConfirm={() => confirmMutation.mutate()}
+      onReject={() => rejectMutation.mutate()}
+      onStart={() => startMutation.mutate()}
+      onComplete={() => completeMutation.mutate()}
+      onCancel={() => cancelMutation.mutate()}
+      onMarkPaidCash={() => markPaidMutation.mutate()}
+      isConfirming={confirmMutation.isPending}
+      isRejecting={rejectMutation.isPending}
+      isStarting={startMutation.isPending}
+      isCompleting={completeMutation.isPending}
+      isCancelling={cancelMutation.isPending}
+      isMarkingPaid={markPaidMutation.isPending}
+      actionsDisabled={isMutating}
+    />
   );
 }

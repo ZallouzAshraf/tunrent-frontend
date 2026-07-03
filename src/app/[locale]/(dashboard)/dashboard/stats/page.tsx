@@ -23,7 +23,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { dashboardApi } from "@/lib/api";
 import { formatPrice } from "@/lib/utils";
-import { CalendarDays, DollarSign, TrendingUp, Users } from "lucide-react";
+import { Banknote, CalendarDays, TrendingUp, Users } from "lucide-react";
 
 export default function DashboardStatsPage() {
   const { data: stats, isLoading } = useQuery({
@@ -60,7 +60,7 @@ export default function DashboardStatsPage() {
             <KpiCard
               title="Chiffre d'affaires"
               value={formatPrice(stats?.totalRevenue ?? 0)}
-              icon={DollarSign}
+              icon={Banknote}
               description="Total encaissé"
             />
             <KpiCard

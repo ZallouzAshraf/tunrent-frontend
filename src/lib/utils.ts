@@ -23,6 +23,22 @@ export function formatDate(date: string | Date, locale = "fr") {
   }).format(new Date(date));
 }
 
+export function formatRelativeTime(date: string | Date, locale = "fr") {
+  const then = new Date(date).getTime();
+  const now = Date.now();
+  const diffSec = Math.round((then - now) / 1000);
+  const absSec = Math.abs(diffSec);
+
+  const rtf = new Intl.RelativeTimeFormat(locale, { numeric: "auto" });
+
+  if (absSec < 60) return "À l'instant";
+  if (absSec < 3600) return rtf.format(Math.round(diffSec / 60), "minute");
+  if (absSec < 86400) return rtf.format(Math.round(diffSec / 3600), "hour");
+  if (absSec < 604800) return rtf.format(Math.round(diffSec / 86400), "day");
+
+  return formatDate(date, locale);
+}
+
 export function daysBetween(start: string, end: string) {
   const s = new Date(start);
   const e = new Date(end);

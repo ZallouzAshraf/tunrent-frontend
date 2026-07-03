@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { usePathname, useRouter } from "@/i18n/routing";
 import {
+  DashboardMobileHeader,
   DashboardMobileNav,
   DashboardSidebar,
 } from "@/components/dashboard/sidebar";
@@ -50,12 +51,17 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="flex min-h-screen flex-col lg:flex-row">
+    <div className="flex min-h-screen bg-[#F2F2F7]">
       <DashboardSidebar />
       <div className="flex min-w-0 flex-1 flex-col">
         <DashboardTopbar />
+        <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-5 pb-28 lg:px-8 lg:py-8 lg:pb-8">
+          <div className="mb-5 lg:hidden">
+            <DashboardMobileHeader />
+          </div>
+          {children}
+        </main>
         <DashboardMobileNav role={agencyRole ?? undefined} />
-        <main className="flex-1 p-4 lg:p-6">{children}</main>
       </div>
     </div>
   );
@@ -63,8 +69,8 @@ export default function DashboardLayout({
 
 function AuthSpinner() {
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+    <div className="flex min-h-screen items-center justify-center bg-[#F2F2F7]">
+      <div className="h-10 w-10 animate-spin rounded-full border-[3px] border-primary/20 border-t-primary" />
     </div>
   );
 }
