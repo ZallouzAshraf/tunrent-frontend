@@ -12,10 +12,9 @@ const discoverLinks = [
 ] as const;
 
 const legalLinks = [
-  { href: "/cgu" as const, key: "cgu" },
-  { href: "/cgv" as const, key: "cgv" },
-  { href: "/confidentialite" as const, key: "privacy" },
-  { href: "/contact" as const, key: "contact" },
+  { href: "/conditions" as const, key: "termsOfUse" },
+  { href: "/confidentialite" as const, key: "privacyPolicy" },
+  { href: "/cookies" as const, key: "cookiePolicy" },
 ] as const;
 
 export async function Footer() {

@@ -42,7 +42,7 @@ export function CookieConsentBanner() {
               {t("accept")}
             </Button>
             <Button size="sm" variant="outline" asChild>
-              <Link href="/confidentialite">{t("learnMore")}</Link>
+              <Link href="/cookies">{t("learnMore")}</Link>
             </Button>
           </div>
         </div>

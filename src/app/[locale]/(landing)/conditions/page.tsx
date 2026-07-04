@@ -9,18 +9,18 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const doc = getLegalDocument("privacy", locale);
+  const doc = getLegalDocument("terms", locale);
   return { title: doc.title, description: doc.metaDescription };
 }
 
-export default async function PrivacyPage({
+export default async function ConditionsPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  const document = getLegalDocument("privacy", locale);
+  const document = getLegalDocument("terms", locale);
 
   return <LegalDocument document={document} />;
 }

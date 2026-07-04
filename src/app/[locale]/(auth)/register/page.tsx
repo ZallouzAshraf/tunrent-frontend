@@ -250,7 +250,7 @@ export default function RegisterPage() {
                 className="text-xs font-normal leading-snug text-muted-foreground"
               >
                 {t("acceptTermsPrefix")}{" "}
-                <Link href="/cgu" className="font-medium text-primary hover:underline">
+                <Link href="/conditions" className="font-medium text-primary hover:underline">
                   {t("termsLink")}
                 </Link>
               </Label>
