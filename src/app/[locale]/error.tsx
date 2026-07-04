@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import { useTranslations } from "next-intl";
-import { AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/shared/logo";
 import { Link } from "@/i18n/routing";
 
 export default function Error({
@@ -21,8 +21,8 @@ export default function Error({
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
-      <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/10">
-        <AlertTriangle className="h-8 w-8 text-destructive" />
+      <div className="mb-6">
+        <Logo size="lg" linked={false} />
       </div>
       <h1 className="text-2xl font-bold">{t("title")}</h1>
       <p className="mt-2 max-w-md text-muted-foreground">{t("description")}</p>

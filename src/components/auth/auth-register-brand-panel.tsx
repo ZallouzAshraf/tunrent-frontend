@@ -32,7 +32,7 @@ export async function AuthRegisterBrandPanel() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(45,212,191,0.08)_0%,transparent_45%)]" />
 
       <div className="relative z-10 flex flex-col justify-center px-10 py-8 xl:px-14">
-        <Logo className="[&_span]:text-white [&_.text-primary]:text-white [&_.text-accent]:text-[var(--tunrent-gold)]" />
+        <Logo surface="dark" size="md" />
 
         <div className="mt-10 max-w-md">
           <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white/90 backdrop-blur-sm">

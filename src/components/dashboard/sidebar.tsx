@@ -18,6 +18,7 @@ import {
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
 import { NotificationUnreadBadge } from "@/components/dashboard/notification-unread-badge";
+import { Logo } from "@/components/shared/logo";
 import { canAccessRoute } from "@/lib/constants/permissions";
 import { useUnreadNotificationsCount } from "@/lib/dashboard/use-dashboard-notifications";
 import { useAuth } from "@/lib/auth/use-auth";
@@ -121,14 +122,9 @@ export function DashboardSidebar() {
 
   return (
     <aside className="sticky top-0 hidden h-screen w-[17rem] shrink-0 flex-col border-r border-black/[0.06] bg-white/75 px-3 py-4 backdrop-blur-2xl lg:flex">
-      <div className="mb-4 flex items-center gap-2.5 px-1.5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-[#254a73] text-primary-foreground shadow-[0_6px_16px_rgba(30,58,95,0.22)]">
-          <Car className="h-4 w-4" aria-hidden />
-        </div>
-        <div>
-          <p className="text-sm font-bold tracking-tight text-primary">TunRent</p>
-          <p className="text-[11px] text-muted-foreground">{t("agencySpace")}</p>
-        </div>
+      <div className="mb-4 px-1.5">
+        <Logo href="/dashboard" size="sm" />
+        <p className="mt-1.5 text-[11px] text-muted-foreground">{t("agencySpace")}</p>
       </div>
 
       <nav className="flex min-h-0 flex-1 flex-col justify-between px-0.5">
@@ -243,8 +239,9 @@ export function DashboardMobileHeader() {
   const t = useTranslations("dashboard");
 
   return (
-    <div className="flex items-center justify-between px-1 lg:hidden">
-      <div>
+    <div className="flex items-center justify-between gap-3 px-1 lg:hidden">
+      <Logo href="/dashboard" size="sm" showText={false} className="shrink-0" />
+      <div className="min-w-0 flex-1">
         <div className="mb-1 inline-flex items-center gap-1.5 rounded-full bg-primary/8 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary">
           <Sparkles className="h-3 w-3" aria-hidden />
           {t("mobile.badge")}

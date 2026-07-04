@@ -26,7 +26,7 @@ export async function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-4">
-            <Logo className="[&_span]:text-white [&_.text-primary]:text-white [&_.text-accent]:text-accent" />
+            <Logo surface="dark" size="sm" />
             <p className="text-sm text-primary-foreground/70">{t("tagline")}</p>
             <div className="flex gap-3">
               <a

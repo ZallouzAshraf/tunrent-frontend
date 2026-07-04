@@ -5,11 +5,11 @@ import {
   CreditCard,
   LayoutDashboard,
   LogOut,
-  Shield,
   Users,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
+import { Logo } from "@/components/shared/logo";
 import { useLogout } from "@/lib/auth/use-logout";
 import { cn } from "@/lib/utils";
 
@@ -80,16 +80,11 @@ export function AdminSidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-50 hidden w-[17.5rem] flex-col border-r border-white/[0.06] bg-[#0f172a] lg:flex">
       <div className="flex h-full flex-col px-4 py-5">
-        <div className="mb-8 flex items-center gap-3 px-2">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-amber-400 to-amber-600 text-[#0f172a] shadow-lg shadow-amber-500/20">
-            <Shield className="h-5 w-5" />
-          </div>
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-              {t("brand")}
-            </p>
-            <p className="text-base font-bold text-white">{t("title")}</p>
-          </div>
+        <div className="mb-8 px-2">
+          <Logo href="/admin" surface="dark" size="sm" showText />
+          <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+            {t("title")}
+          </p>
         </div>
 
         <nav className="flex-1 space-y-6 overflow-y-auto">

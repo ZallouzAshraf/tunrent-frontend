@@ -26,7 +26,7 @@ export async function AuthBrandPanel() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(212,168,83,0.2)_0%,transparent_55%)]" />
 
       <div className="relative z-10 flex flex-1 flex-col justify-center px-10 py-8 xl:px-12">
-        <Logo className="[&_span]:text-white [&_.text-primary]:text-white [&_.text-accent]:text-[var(--tunrent-gold)]" />
+        <Logo surface="dark" size="md" />
 
         <div className="mt-8 max-w-md">
           <h2 className="text-2xl font-bold leading-tight text-white xl:text-3xl">

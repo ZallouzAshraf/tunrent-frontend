@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
-import { FileQuestion } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/shared/logo";
 import { Link } from "@/i18n/routing";
 
 export default async function NotFound() {
@@ -8,8 +8,8 @@ export default async function NotFound() {
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center px-4 text-center">
-      <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10">
-        <FileQuestion className="h-8 w-8 text-primary" />
+      <div className="mb-6">
+        <Logo size="lg" linked={false} />
       </div>
       <p className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">
         404

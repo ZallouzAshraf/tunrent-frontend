@@ -16,6 +16,7 @@ import { Link, usePathname } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/shared/logo";
 import { useAuth } from "@/lib/auth/use-auth";
 import { useLogout } from "@/lib/auth/use-logout";
 
@@ -39,7 +40,13 @@ export function AccountSidebar() {
 
   return (
     <aside className="flex w-full flex-col lg:w-64 lg:shrink-0">
+      <div className="mb-4 lg:hidden">
+        <Logo href="/" size="sm" />
+      </div>
       <div className="rounded-xl border bg-card p-4 shadow-sm">
+        <div className="mb-4 hidden lg:block">
+          <Logo href="/" size="sm" showText={false} />
+        </div>
         <div className="mb-4 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-semibold">
             {user?.firstName?.[0]}

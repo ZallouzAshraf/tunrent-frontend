@@ -26,7 +26,7 @@ export async function AuthForgotBrandPanel() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_left,_rgba(212,168,83,0.12)_0%,transparent_50%)]" />
 
       <div className="relative z-10 flex flex-col justify-center px-10 py-8 xl:px-14">
-        <Logo className="[&_span]:text-white [&_.text-primary]:text-white [&_.text-accent]:text-[var(--tunrent-gold)]" />
+        <Logo surface="dark" size="md" />
 
         <div className="mt-10 max-w-md">
           <div className="mb-4 flex size-14 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-sm">
