@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
 import { useTranslations, useLocale } from "next-intl";
@@ -14,61 +14,58 @@ import {
 import { StarRating } from "@/components/shared/star-rating";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import type { FeaturedReview } from "@/lib/api";
 
-interface FeaturedReview {
-  id: string;
-  clientName: string;
-  agencyName: string;
-  rating: number;
-  comment: string;
-  governorate: string;
-}
-
-const FEATURED_REVIEWS: FeaturedReview[] = [
+const FALLBACK_REVIEWS: FeaturedReview[] = [
   {
-    id: "1",
+    id: "fallback-1",
     clientName: "Amine B.",
     agencyName: "Auto Prestige Tunis",
     rating: 5,
     comment:
       "Service impeccable ! La voiture était en parfait état et l'agence très professionnelle. Je recommande vivement TunRent.",
     governorate: "Tunis",
+    createdAt: new Date().toISOString(),
   },
   {
-    id: "2",
+    id: "fallback-2",
     clientName: "Sarah M.",
     agencyName: "Sousse Location",
     rating: 4.5,
     comment:
       "Réservation facile en ligne, récupération rapide à l'aéroport. Prix transparent, sans surprise.",
     governorate: "Sousse",
+    createdAt: new Date().toISOString(),
   },
   {
-    id: "3",
+    id: "fallback-3",
     clientName: "Karim T.",
     agencyName: "Sfax Auto Rent",
     rating: 5,
     comment:
       "Troisième location via TunRent et toujours aussi satisfait. Le support répond rapidement.",
     governorate: "Sfax",
+    createdAt: new Date().toISOString(),
   },
   {
-    id: "4",
+    id: "fallback-4",
     clientName: "Leila H.",
     agencyName: "Nabeul Cars",
     rating: 4,
     comment:
       "Parfait pour nos vacances à Hammamet. Large choix de véhicules et agences sérieuses.",
     governorate: "Nabeul",
+    createdAt: new Date().toISOString(),
   },
   {
-    id: "5",
+    id: "fallback-5",
     clientName: "Mohamed A.",
     agencyName: "Djerba Mobility",
     rating: 5,
     comment:
       "Location d'un SUV pour explorer le sud tunisien. Processus simple, agence flexible.",
     governorate: "Médenine",
+    createdAt: new Date().toISOString(),
   },
 ];
 
@@ -135,19 +132,33 @@ function ReviewCard({ review }: { review: FeaturedReview }) {
             {review.agencyName}
           </p>
         </div>
-        <p className="hidden shrink-0 items-center gap-1 text-[11px] text-muted-foreground sm:flex">
-          <MapPin className="size-3 text-primary/50" />
-          {review.governorate}
-        </p>
+        {review.governorate && (
+          <p className="hidden shrink-0 items-center gap-1 text-[11px] text-muted-foreground sm:flex">
+            <MapPin className="size-3 text-primary/50" />
+            {review.governorate}
+          </p>
+        )}
       </footer>
     </article>
   );
 }
 
-export function ReviewsCarousel() {
+interface ReviewsCarouselProps {
+  reviews?: FeaturedReview[];
+}
+
+export function ReviewsCarousel({ reviews: initialReviews }: ReviewsCarouselProps) {
   const t = useTranslations("landing.reviews");
   const locale = useLocale() as "fr" | "ar";
   const [selectedIndex, setSelectedIndex] = useState(0);
+
+  const reviews = useMemo(
+    () =>
+      initialReviews && initialReviews.length > 0
+        ? initialReviews
+        : FALLBACK_REVIEWS,
+    [initialReviews],
+  );
 
   const [emblaRef, emblaApi] = useEmblaCarousel(
     {
@@ -174,8 +185,7 @@ export function ReviewsCarousel() {
   }, [emblaApi]);
 
   const avgRating =
-    FEATURED_REVIEWS.reduce((sum, r) => sum + r.rating, 0) /
-    FEATURED_REVIEWS.length;
+    reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
 
   return (
     <section className="border-y bg-muted/20 py-14 sm:py-16">
@@ -204,7 +214,7 @@ export function ReviewsCarousel() {
                 <div>
                   <StarRating rating={avgRating} size="sm" />
                   <p className="mt-0.5 text-[11px] text-muted-foreground">
-                    {t("statsLabel", { count: FEATURED_REVIEWS.length })}
+                    {t("statsLabel", { count: reviews.length })}
                   </p>
                 </div>
               </div>
@@ -235,7 +245,7 @@ export function ReviewsCarousel() {
 
         <div className="mt-8 min-w-0 overflow-hidden" ref={emblaRef}>
           <div className="flex touch-pan-y items-stretch gap-4">
-            {FEATURED_REVIEWS.map((review) => (
+            {reviews.map((review) => (
               <div
                 key={review.id}
                 className="flex min-w-0 shrink-0 grow-0 basis-full sm:basis-[calc(50%-0.5rem)] lg:basis-[calc(33.333%-0.667rem)]"
@@ -247,7 +257,7 @@ export function ReviewsCarousel() {
         </div>
 
         <div className="mt-5 flex justify-center gap-1.5">
-          {FEATURED_REVIEWS.map((review, index) => (
+          {reviews.map((review, index) => (
             <button
               key={review.id}
               type="button"

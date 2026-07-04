@@ -13,6 +13,7 @@ const discoverLinks = [
 
 const legalLinks = [
   { href: "/cgu" as const, key: "cgu" },
+  { href: "/cgv" as const, key: "cgv" },
   { href: "/confidentialite" as const, key: "privacy" },
   { href: "/contact" as const, key: "contact" },
 ] as const;

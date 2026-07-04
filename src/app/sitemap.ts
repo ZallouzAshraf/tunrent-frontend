@@ -11,6 +11,7 @@ const staticRoutes = [
   "/a-propos",
   "/contact",
   "/cgu",
+  "/cgv",
   "/confidentialite",
   "/login",
   "/register",

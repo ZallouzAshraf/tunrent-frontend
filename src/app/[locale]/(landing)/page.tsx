@@ -8,6 +8,8 @@ import { PartnerAgencies } from "@/components/landing/partner-agencies";
 import { GovernoratesGrid } from "@/components/landing/governorates-grid";
 import { ReviewsCarousel } from "@/components/landing/reviews-carousel";
 import { AgencyCta } from "@/components/landing/agency-cta";
+import { serverFetch } from "@/lib/api/server";
+import type { FeaturedReview } from "@/lib/api";
 
 export async function generateMetadata({
   params,
@@ -31,6 +33,11 @@ export default async function HomePage({
   const { locale } = await params;
   setRequestLocale(locale);
 
+  const featuredReviews = await serverFetch<FeaturedReview[]>(
+    "/marketplace/reviews/featured",
+    { next: { revalidate: 600 } },
+  );
+
   return (
     <>
       <HeroSearch />
@@ -39,7 +46,7 @@ export default async function HomePage({
       <HowItWorks />
       <PartnerAgencies />
       <GovernoratesGrid />
-      <ReviewsCarousel />
+      <ReviewsCarousel reviews={featuredReviews ?? undefined} />
       <AgencyCta />
     </>
   );

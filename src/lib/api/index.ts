@@ -62,6 +62,16 @@ export const authApi = {
 };
 
 // Marketplace
+export interface FeaturedReview {
+  id: string;
+  clientName: string;
+  agencyName: string;
+  governorate: string | null;
+  rating: number;
+  comment: string;
+  createdAt: string;
+}
+
 export const marketplaceApi = {
   getCars: (params?: MarketplaceCarSearchParams) =>
     apiClient.get<PaginatedResult<Car>>("/marketplace/cars", { params }),
@@ -84,6 +94,19 @@ export const marketplaceApi = {
       `/marketplace/bookings/${reference}`,
       { params: { email } },
     ),
+
+  getFeaturedReviews: () =>
+    apiClient.get<FeaturedReview[]>("/marketplace/reviews/featured"),
+};
+
+// Public (landing)
+export const publicApi = {
+  contact: (data: {
+    name: string;
+    email: string;
+    subject: string;
+    message: string;
+  }) => apiClient.post<{ message: string }>("/public/contact", data),
 };
 
 // Client
