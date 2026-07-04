@@ -2,6 +2,7 @@ import createMiddleware from "next-intl/middleware";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { LOGGED_IN_COOKIE, HOME_COOKIE } from "@/lib/auth/constants";
+import { localePrefixFromPath, withLocalePrefix } from "@/lib/locale-path";
 import { routing } from "./i18n/routing";
 
 const intlMiddleware = createMiddleware(routing);
@@ -11,21 +12,10 @@ const protectedDashboardRoutes = ["/dashboard"];
 const protectedAdminRoutes = ["/admin"];
 const authRoutes = ["/login", "/register", "/verify-email"];
 
-function decodeJwtAgencyId(token: string): string | undefined {
-  try {
-    const base64 = token.split(".")[1]?.replace(/-/g, "+").replace(/_/g, "/");
-    if (!base64) return undefined;
-    const payload = JSON.parse(atob(base64));
-    return typeof payload.agencyId === "string" ? payload.agencyId : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
 export default function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const isLoggedIn =
-    request.cookies.get(LOGGED_IN_COOKIE)?.value === "1";
+  const localePrefix = localePrefixFromPath(pathname);
+  const isLoggedIn = request.cookies.get(LOGGED_IN_COOKIE)?.value === "1";
 
   const isProtectedClient = protectedClientRoutes.some((r) =>
     pathname.includes(r),
@@ -42,7 +32,7 @@ export default function middleware(request: NextRequest) {
     (isProtectedClient || isProtectedDashboard || isProtectedAdmin) &&
     !isLoggedIn
   ) {
-    const loginUrl = new URL("/login", request.url);
+    const loginUrl = new URL(withLocalePrefix("/login", localePrefix), request.url);
     loginUrl.searchParams.set("redirect", pathname);
     return NextResponse.redirect(loginUrl);
   }
@@ -59,10 +49,14 @@ export default function middleware(request: NextRequest) {
 
     const home = request.cookies.get(HOME_COOKIE)?.value;
     if (home === "/admin" || home === "/dashboard" || home === "/account") {
-      return NextResponse.redirect(new URL(home, request.url));
+      return NextResponse.redirect(
+        new URL(withLocalePrefix(home, localePrefix), request.url),
+      );
     }
 
-    return NextResponse.redirect(new URL("/account", request.url));
+    return NextResponse.redirect(
+      new URL(withLocalePrefix("/account", localePrefix), request.url),
+    );
   }
 
   return intlMiddleware(request);

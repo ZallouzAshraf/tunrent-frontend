@@ -15,6 +15,7 @@ import {
   Users,
   Wrench,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
 import { NotificationUnreadBadge } from "@/components/dashboard/notification-unread-badge";
 import { canAccessRoute } from "@/lib/constants/permissions";
@@ -26,38 +27,38 @@ import type { AgencyUserRole } from "@/types";
 
 type NavItem = {
   href: string;
-  label: string;
+  labelKey: string;
   icon: React.ComponentType<{ className?: string }>;
 };
 
-const navSections: { title: string; items: NavItem[] }[] = [
+const navSections: { titleKey: string; items: NavItem[] }[] = [
   {
-    title: "Principal",
+    titleKey: "sections.main",
     items: [
-      { href: "/dashboard", label: "Vue d'ensemble", icon: LayoutDashboard },
-      { href: "/dashboard/bookings", label: "Réservations", icon: CalendarDays },
-      { href: "/dashboard/calendar", label: "Calendrier", icon: Calendar },
-      { href: "/dashboard/cars", label: "Voitures", icon: Car },
+      { href: "/dashboard", labelKey: "overview", icon: LayoutDashboard },
+      { href: "/dashboard/bookings", labelKey: "bookings", icon: CalendarDays },
+      { href: "/dashboard/calendar", labelKey: "calendar", icon: Calendar },
+      { href: "/dashboard/cars", labelKey: "cars", icon: Car },
     ],
   },
   {
-    title: "Activité",
+    titleKey: "sections.activity",
     items: [
-      { href: "/dashboard/availability", label: "Disponibilités", icon: Wrench },
-      { href: "/dashboard/payments", label: "Paiements", icon: CreditCard },
-      { href: "/dashboard/reviews", label: "Avis", icon: Star },
-      { href: "/dashboard/notifications", label: "Notifications", icon: Bell },
+      { href: "/dashboard/availability", labelKey: "availability", icon: Wrench },
+      { href: "/dashboard/payments", labelKey: "payments", icon: CreditCard },
+      { href: "/dashboard/reviews", labelKey: "reviews", icon: Star },
+      { href: "/dashboard/notifications", labelKey: "notifications", icon: Bell },
     ],
   },
   {
-    title: "Administration",
+    titleKey: "sections.admin",
     items: [
-      { href: "/dashboard/stats", label: "Statistiques", icon: BarChart3 },
-      { href: "/dashboard/team", label: "Équipe", icon: Users },
-      { href: "/dashboard/settings/agency", label: "Agence", icon: Settings },
+      { href: "/dashboard/stats", labelKey: "stats", icon: BarChart3 },
+      { href: "/dashboard/team", labelKey: "team", icon: Users },
+      { href: "/dashboard/settings/agency", labelKey: "agency", icon: Settings },
       {
         href: "/dashboard/settings/billing",
-        label: "Facturation",
+        labelKey: "billing",
         icon: CreditCard,
       },
     ],
@@ -70,7 +71,13 @@ function NavLink({
   icon: Icon,
   active,
   badge,
-}: NavItem & { active: boolean; badge?: number }) {
+}: {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  active: boolean;
+  badge?: number;
+}) {
   return (
     <Link
       href={href}
@@ -102,6 +109,7 @@ function NavLink({
 
 export function DashboardSidebar() {
   const pathname = usePathname();
+  const t = useTranslations("dashboard");
   const { agencyRole } = useAuth();
   const logout = useLogout();
   const unreadCount = useUnreadNotificationsCount();
@@ -119,7 +127,7 @@ export function DashboardSidebar() {
         </div>
         <div>
           <p className="text-sm font-bold tracking-tight text-primary">TunRent</p>
-          <p className="text-[11px] text-muted-foreground">Espace agence</p>
+          <p className="text-[11px] text-muted-foreground">{t("agencySpace")}</p>
         </div>
       </div>
 
@@ -132,15 +140,17 @@ export function DashboardSidebar() {
             if (visibleItems.length === 0) return null;
 
             return (
-              <div key={section.title}>
+              <div key={section.titleKey}>
                 <p className="mb-1 px-2.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground/75">
-                  {section.title}
+                  {t(section.titleKey)}
                 </p>
                 <div className="space-y-0.5">
                   {visibleItems.map((item) => (
                     <NavLink
                       key={item.href}
-                      {...item}
+                      href={item.href}
+                      label={t(item.labelKey)}
+                      icon={item.icon}
                       active={isActive(item.href)}
                       badge={
                         item.href === "/dashboard/notifications"
@@ -162,7 +172,7 @@ export function DashboardSidebar() {
             className="flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-black/[0.04] hover:text-foreground"
           >
             <LogOut className="h-4 w-4" aria-hidden />
-            Déconnexion
+            {t("logout")}
           </button>
         </div>
       </nav>
@@ -171,15 +181,16 @@ export function DashboardSidebar() {
 }
 
 const mobileTabs: NavItem[] = [
-  { href: "/dashboard", label: "Accueil", icon: LayoutDashboard },
-  { href: "/dashboard/bookings", label: "Réservations", icon: CalendarDays },
-  { href: "/dashboard/cars", label: "Voitures", icon: Car },
-  { href: "/dashboard/calendar", label: "Calendrier", icon: Calendar },
-  { href: "/dashboard/notifications", label: "Alertes", icon: Bell },
+  { href: "/dashboard", labelKey: "mobile.home", icon: LayoutDashboard },
+  { href: "/dashboard/bookings", labelKey: "bookings", icon: CalendarDays },
+  { href: "/dashboard/cars", labelKey: "cars", icon: Car },
+  { href: "/dashboard/calendar", labelKey: "calendar", icon: Calendar },
+  { href: "/dashboard/notifications", labelKey: "mobile.alerts", icon: Bell },
 ];
 
 export function DashboardMobileNav({ role }: { role?: AgencyUserRole }) {
   const pathname = usePathname();
+  const t = useTranslations("dashboard");
   const unreadCount = useUnreadNotificationsCount();
   const visibleItems = mobileTabs.filter((item) =>
     canAccessRoute(item.href, role),
@@ -188,7 +199,7 @@ export function DashboardMobileNav({ role }: { role?: AgencyUserRole }) {
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-black/[0.06] bg-white/85 px-2 pb-[max(0.5rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur-2xl lg:hidden">
       <div className="mx-auto flex max-w-lg items-stretch justify-around gap-1">
-        {visibleItems.map(({ href, label, icon: Icon }) => {
+        {visibleItems.map(({ href, labelKey, icon: Icon }) => {
           const active =
             href === "/dashboard"
               ? pathname === "/dashboard"
@@ -218,7 +229,7 @@ export function DashboardMobileNav({ role }: { role?: AgencyUserRole }) {
                   />
                 )}
               </div>
-              <span className="truncate">{label}</span>
+              <span className="truncate">{t(labelKey)}</span>
             </Link>
           );
         })}
@@ -229,16 +240,17 @@ export function DashboardMobileNav({ role }: { role?: AgencyUserRole }) {
 
 export function DashboardMobileHeader() {
   const { user } = useAuth();
+  const t = useTranslations("dashboard");
 
   return (
     <div className="flex items-center justify-between px-1 lg:hidden">
       <div>
         <div className="mb-1 inline-flex items-center gap-1.5 rounded-full bg-primary/8 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-primary">
           <Sparkles className="h-3 w-3" aria-hidden />
-          Agence
+          {t("mobile.badge")}
         </div>
         <p className="text-xl font-bold tracking-tight">
-          Bonjour, {user?.firstName}
+          {t("mobile.greeting", { name: user?.firstName ?? "" })}
         </p>
       </div>
       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground shadow-[0_4px_12px_rgba(30,58,95,0.2)]">

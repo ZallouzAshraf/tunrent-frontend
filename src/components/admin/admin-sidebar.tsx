@@ -8,30 +8,31 @@ import {
   Shield,
   Users,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
 import { useLogout } from "@/lib/auth/use-logout";
 import { cn } from "@/lib/utils";
 
 type AdminNavItem = {
   href: string;
-  label: string;
+  labelKey: string;
   icon: React.ComponentType<{ className?: string }>;
   exact?: boolean;
 };
 
-const navSections: { title: string; items: AdminNavItem[] }[] = [
+const navSections: { titleKey: string; items: AdminNavItem[] }[] = [
   {
-    title: "Plateforme",
+    titleKey: "sections.platform",
     items: [
-      { href: "/admin", label: "Vue d'ensemble", icon: LayoutDashboard, exact: true },
-      { href: "/admin/agencies", label: "Agences", icon: Building2 },
-      { href: "/admin/users", label: "Utilisateurs", icon: Users },
+      { href: "/admin", labelKey: "overview", icon: LayoutDashboard, exact: true },
+      { href: "/admin/agencies", labelKey: "agencies", icon: Building2 },
+      { href: "/admin/users", labelKey: "users", icon: Users },
     ],
   },
   {
-    title: "Facturation",
+    titleKey: "sections.billing",
     items: [
-      { href: "/admin/plan-requests", label: "Demandes de plan", icon: CreditCard },
+      { href: "/admin/plan-requests", labelKey: "planRequests", icon: CreditCard },
     ],
   },
 ];
@@ -70,6 +71,7 @@ function NavItem({
 
 export function AdminSidebar() {
   const pathname = usePathname();
+  const t = useTranslations("admin");
   const logout = useLogout();
 
   const isActive = (href: string, exact?: boolean) =>
@@ -84,23 +86,25 @@ export function AdminSidebar() {
           </div>
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-              TunRent
+              {t("brand")}
             </p>
-            <p className="text-base font-bold text-white">Admin Console</p>
+            <p className="text-base font-bold text-white">{t("title")}</p>
           </div>
         </div>
 
         <nav className="flex-1 space-y-6 overflow-y-auto">
           {navSections.map((section) => (
-            <div key={section.title}>
+            <div key={section.titleKey}>
               <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-slate-500">
-                {section.title}
+                {t(section.titleKey)}
               </p>
               <div className="space-y-0.5">
                 {section.items.map((item) => (
                   <NavItem
                     key={item.href}
-                    {...item}
+                    href={item.href}
+                    label={t(item.labelKey)}
+                    icon={item.icon}
                     active={isActive(item.href, item.exact)}
                   />
                 ))}
@@ -116,7 +120,7 @@ export function AdminSidebar() {
             className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-400 transition-colors hover:bg-white/[0.06] hover:text-white"
           >
             <LogOut className="h-4 w-4" />
-            Déconnexion
+            {t("logout")}
           </button>
         </div>
       </div>
@@ -126,6 +130,7 @@ export function AdminSidebar() {
 
 export function AdminMobileNav() {
   const pathname = usePathname();
+  const t = useTranslations("admin");
   const items = navSections.flatMap((s) => s.items);
 
   return (
@@ -142,7 +147,7 @@ export function AdminMobileNav() {
             )}
           >
             <item.icon className="h-5 w-5" />
-            <span className="truncate px-1">{item.label.split(" ")[0]}</span>
+            <span className="truncate px-1">{t(item.labelKey)}</span>
           </Link>
         );
       })}

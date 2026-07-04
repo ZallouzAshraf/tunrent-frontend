@@ -11,6 +11,7 @@ import {
   Star,
   User,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -19,17 +20,18 @@ import { useAuth } from "@/lib/auth/use-auth";
 import { useLogout } from "@/lib/auth/use-logout";
 
 const navItems = [
-  { href: "/account", label: "Vue d'ensemble", icon: LayoutDashboard },
-  { href: "/account/bookings", label: "Mes réservations", icon: CalendarDays },
-  { href: "/account/profile", label: "Profil", icon: User },
-  { href: "/account/documents", label: "Documents", icon: FileText },
-  { href: "/account/reviews", label: "Mes avis", icon: Star },
-  { href: "/account/notifications", label: "Notifications", icon: Bell },
-  { href: "/account/security", label: "Sécurité", icon: Shield },
-];
+  { href: "/account", labelKey: "overview", icon: LayoutDashboard },
+  { href: "/account/bookings", labelKey: "bookings", icon: CalendarDays },
+  { href: "/account/profile", labelKey: "profile", icon: User },
+  { href: "/account/documents", labelKey: "documents", icon: FileText },
+  { href: "/account/reviews", labelKey: "reviews", icon: Star },
+  { href: "/account/notifications", labelKey: "notifications", icon: Bell },
+  { href: "/account/security", labelKey: "security", icon: Shield },
+] as const;
 
 export function AccountSidebar() {
   const pathname = usePathname();
+  const t = useTranslations("account");
   const { user } = useAuth();
   const logout = useLogout();
 
@@ -54,7 +56,7 @@ export function AccountSidebar() {
         </div>
         <Separator className="mb-3" />
         <nav className="space-y-1">
-          {navItems.map(({ href, label, icon: Icon }) => {
+          {navItems.map(({ href, labelKey, icon: Icon }) => {
             const active =
               href === "/account"
                 ? pathname === "/account"
@@ -71,7 +73,7 @@ export function AccountSidebar() {
                 )}
               >
                 <Icon className="h-4 w-4" />
-                {label}
+                {t(labelKey)}
               </Link>
             );
           })}
@@ -83,7 +85,7 @@ export function AccountSidebar() {
           onClick={handleLogout}
         >
           <LogOut className="h-4 w-4" />
-          Déconnexion
+          {t("logout")}
         </Button>
       </div>
       <Link
@@ -91,7 +93,7 @@ export function AccountSidebar() {
         className="mt-4 flex items-center gap-2 rounded-lg border border-dashed p-3 text-sm text-muted-foreground hover:border-primary hover:text-primary transition-colors"
       >
         <Car className="h-4 w-4" />
-        Louer une voiture
+        {t("rentCar")}
       </Link>
     </aside>
   );

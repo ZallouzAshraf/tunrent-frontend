@@ -28,7 +28,24 @@
     "viewDetails": "Voir détails",
     "confirm": "Confirmer",
     "locationSearchPlaceholder": "Rechercher un gouvernorat...",
-    "locationNoResults": "Aucun gouvernorat trouvé"
+    "locationNoResults": "Aucun gouvernorat trouvé",
+    "errors": {
+      "title": "Une erreur est survenue",
+      "description": "Nous n'avons pas pu charger cette page. Veuillez réessayer.",
+      "retry": "Réessayer",
+      "home": "Retour à l'accueil"
+    },
+    "notFound": {
+      "title": "Page introuvable",
+      "description": "La page que vous recherchez n'existe pas ou a été déplacée.",
+      "home": "Retour à l'accueil"
+    },
+    "cookies": {
+      "title": "Nous utilisons des cookies",
+      "description": "Des cookies essentiels assurent le bon fonctionnement du site (session, préférences). En continuant, vous acceptez leur utilisation.",
+      "accept": "J'accepte",
+      "learnMore": "En savoir plus"
+    }
   },
   "metadata": {
     "home": {
@@ -89,7 +106,14 @@
     "forgotSuccessTitle": "Vérifiez votre boîte mail",
     "forgotSuccessDesc": "Si un compte existe avec cet email, vous recevrez un lien de réinitialisation sous peu.",
     "forgotSuccessNote": "Pensez à vérifier vos spams si vous ne voyez rien dans les prochaines minutes.",
-    "backToLogin": "Retour à la connexion",
+    "resetPageTitle": "Nouveau mot de passe",
+    "resetPageSubtitle": "Choisissez un mot de passe sécurisé",
+    "resetNewPassword": "Nouveau mot de passe",
+    "resetConfirmPassword": "Confirmer",
+    "resetSubmit": "Réinitialiser",
+    "resetSuccessToast": "Mot de passe mis à jour",
+    "resetSuccessDesc": "Votre mot de passe a été mis à jour avec succès.",
+    "resetBackToLogin": "Retour à la connexion",
     "forgotBrandPanel": {
       "title": "Récupérez l'accès à votre compte",
       "subtitle": "Pas de panique — nous vous enverrons un lien sécurisé pour définir un nouveau mot de passe.",
@@ -117,12 +141,15 @@
   },
   "account": {
     "title": "Mon compte",
+    "overview": "Vue d'ensemble",
     "bookings": "Mes réservations",
     "profile": "Profil",
     "documents": "Documents",
     "reviews": "Mes avis",
     "notifications": "Notifications",
-    "security": "Sécurité"
+    "security": "Sécurité",
+    "logout": "Déconnexion",
+    "rentCar": "Louer une voiture"
   },
   "dashboard": {
     "title": "Tableau de bord",
@@ -136,7 +163,35 @@
     "notifications": "Notifications",
     "stats": "Statistiques",
     "team": "Équipe",
-    "settings": "Paramètres"
+    "settings": "Paramètres",
+    "billing": "Facturation",
+    "agency": "Agence",
+    "agencySpace": "Espace agence",
+    "logout": "Déconnexion",
+    "sections": {
+      "main": "Principal",
+      "activity": "Activité",
+      "admin": "Administration"
+    },
+    "mobile": {
+      "home": "Accueil",
+      "alerts": "Alertes",
+      "badge": "Agence",
+      "greeting": "Bonjour, {name}"
+    }
+  },
+  "admin": {
+    "brand": "TunRent",
+    "title": "Admin Console",
+    "overview": "Vue d'ensemble",
+    "agencies": "Agences",
+    "users": "Utilisateurs",
+    "planRequests": "Demandes de plan",
+    "logout": "Déconnexion",
+    "sections": {
+      "platform": "Plateforme",
+      "billing": "Facturation"
+    }
   },
   "landing": {
     "header": {

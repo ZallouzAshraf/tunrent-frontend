@@ -3,6 +3,7 @@
 import { use } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { AuthCard } from "@/components/auth/auth-card";
@@ -23,6 +24,7 @@ export default function ResetPasswordPage({
 }) {
   const { token } = use(params);
   const router = useRouter();
+  const t = useTranslations("auth");
   const {
     register,
     handleSubmit,
@@ -32,7 +34,7 @@ export default function ResetPasswordPage({
   const onSubmit = async (data: ResetForm) => {
     try {
       await authApi.resetPassword(token, data.password);
-      toast.success("Mot de passe mis à jour");
+      toast.success(t("resetSuccessToast"));
       router.push("/login");
     } catch (err) {
       toast.error(getErrorMessage(err));
@@ -40,21 +42,16 @@ export default function ResetPasswordPage({
   };
 
   return (
-    <AuthCard
-      title="Nouveau mot de passe"
-      description="Choisissez un mot de passe sécurisé"
-    >
+    <AuthCard title={t("resetPageTitle")} description={t("resetPageSubtitle")}>
       {isSubmitSuccessful ? (
         <div className="text-center space-y-4 py-4">
           <CheckCircle2 className="mx-auto h-12 w-12 text-green-600" />
-          <p className="text-sm text-muted-foreground">
-            Votre mot de passe a été mis à jour avec succès.
-          </p>
+          <p className="text-sm text-muted-foreground">{t("resetSuccessDesc")}</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="password">Nouveau mot de passe</Label>
+            <Label htmlFor="password">{t("resetNewPassword")}</Label>
             <Input id="password" type="password" {...register("password")} />
             {errors.password && (
               <p className="text-sm text-destructive">
@@ -63,7 +60,7 @@ export default function ResetPasswordPage({
             )}
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirmer</Label>
+            <Label htmlFor="confirmPassword">{t("resetConfirmPassword")}</Label>
             <Input
               id="confirmPassword"
               type="password"
@@ -77,11 +74,11 @@ export default function ResetPasswordPage({
           </div>
           <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="animate-spin" />}
-            Réinitialiser
+            {t("resetSubmit")}
           </Button>
           <p className="text-center text-sm text-muted-foreground">
             <Link href="/login" className="text-primary hover:underline">
-              Retour à la connexion
+              {t("resetBackToLogin")}
             </Link>
           </p>
         </form>

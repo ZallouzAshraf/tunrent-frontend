@@ -28,7 +28,24 @@
     "viewDetails": "عرض التفاصيل",
     "confirm": "تأكيد",
     "locationSearchPlaceholder": "البحث عن ولاية...",
-    "locationNoResults": "لم يتم العثور على ولاية"
+    "locationNoResults": "لم يتم العثور على ولاية",
+    "errors": {
+      "title": "حدث خطأ",
+      "description": "تعذر تحميل هذه الصفحة. يرجى المحاولة مرة أخرى.",
+      "retry": "إعادة المحاولة",
+      "home": "العودة للرئيسية"
+    },
+    "notFound": {
+      "title": "الصفحة غير موجودة",
+      "description": "الصفحة التي تبحث عنها غير موجودة أو تم نقلها.",
+      "home": "العودة للرئيسية"
+    },
+    "cookies": {
+      "title": "نستخدم ملفات تعريف الارتباط",
+      "description": "ملفات تعريف الارتباط الأساسية تضمن عمل الموقع (الجلسة، التفضيلات). بالمتابعة، فإنك توافق على استخدامها.",
+      "accept": "أوافق",
+      "learnMore": "معرفة المزيد"
+    }
   },
   "metadata": {
     "home": {
@@ -89,6 +106,14 @@
     "forgotSuccessTitle": "تحقق من بريدك",
     "forgotSuccessDesc": "إذا وُجد حساب بهذا البريد، ستتلقى رابط إعادة التعيين قريباً.",
     "forgotSuccessNote": "تحقق من البريد المزعج إن لم يصلك شيء خلال دقائق.",
+    "resetPageTitle": "كلمة مرور جديدة",
+    "resetPageSubtitle": "اختر كلمة مرور آمنة",
+    "resetNewPassword": "كلمة المرور الجديدة",
+    "resetConfirmPassword": "تأكيد",
+    "resetSubmit": "إعادة التعيين",
+    "resetSuccessToast": "تم تحديث كلمة المرور",
+    "resetSuccessDesc": "تم تحديث كلمة المرور بنجاح.",
+    "resetBackToLogin": "العودة لتسجيل الدخول",
     "forgotBrandPanel": {
       "title": "استعد الوصول إلى حسابك",
       "subtitle": "لا داعي للقلق — سنرسل لك رابطاً آمناً لتعيين كلمة مرور جديدة.",
@@ -116,12 +141,15 @@
   },
   "account": {
     "title": "حسابي",
+    "overview": "نظرة عامة",
     "bookings": "حجوزاتي",
     "profile": "الملف الشخصي",
     "documents": "المستندات",
     "reviews": "آرائي",
     "notifications": "الإشعارات",
-    "security": "الأمان"
+    "security": "الأمان",
+    "logout": "تسجيل الخروج",
+    "rentCar": "استئجار سيارة"
   },
   "dashboard": {
     "title": "لوحة التحكم",
@@ -135,7 +163,35 @@
     "notifications": "الإشعارات",
     "stats": "الإحصائيات",
     "team": "الفريق",
-    "settings": "الإعدادات"
+    "settings": "الإعدادات",
+    "billing": "الفوترة",
+    "agency": "الوكالة",
+    "agencySpace": "فضاء الوكالة",
+    "logout": "تسجيل الخروج",
+    "sections": {
+      "main": "الرئيسية",
+      "activity": "النشاط",
+      "admin": "الإدارة"
+    },
+    "mobile": {
+      "home": "الرئيسية",
+      "alerts": "التنبيهات",
+      "badge": "وكالة",
+      "greeting": "مرحباً، {name}"
+    }
+  },
+  "admin": {
+    "brand": "TunRent",
+    "title": "لوحة الإدارة",
+    "overview": "نظرة عامة",
+    "agencies": "الوكالات",
+    "users": "المستخدمون",
+    "planRequests": "طلبات الخطة",
+    "logout": "تسجيل الخروج",
+    "sections": {
+      "platform": "المنصة",
+      "billing": "الفوترة"
+    }
   },
   "landing": {
     "header": {

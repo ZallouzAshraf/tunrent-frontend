@@ -52,15 +52,20 @@ function CarDetailContent({ params }: CarDetailPageProps) {
   const locale = useLocale() as "fr" | "ar";
   const searchParams = useSearchParams();
 
-  const { data: car, isLoading } = useQuery({
+  const { data: car, isLoading, isError } = useQuery({
     queryKey: ["marketplace-car", carId],
     queryFn: async () => {
       const res = await marketplaceApi.getCar(carId);
       return res.data;
     },
+    retry: (failureCount, error) => {
+      const status = (error as { response?: { status?: number } })?.response?.status;
+      if (status === 404) return false;
+      return failureCount < 2;
+    },
   });
 
-  if (isLoading || !car) {
+  if (isLoading) {
     return (
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
         <Skeleton className="mb-6 h-8 w-64" />
@@ -68,6 +73,26 @@ function CarDetailContent({ params }: CarDetailPageProps) {
           <Skeleton className="h-96 lg:col-span-2 rounded-xl" />
           <Skeleton className="h-80 rounded-xl" />
         </div>
+      </div>
+    );
+  }
+
+  if (isError || !car) {
+    return (
+      <div className="mx-auto max-w-7xl px-4 py-16 text-center sm:px-6 lg:px-8">
+        <h1 className="text-2xl font-bold">
+          {locale === "ar" ? "السيارة غير موجودة" : "Voiture introuvable"}
+        </h1>
+        <p className="mt-2 text-muted-foreground">
+          {locale === "ar"
+            ? "قد تكون هذه السيارة غير متاحة أو تمت إزالتها."
+            : "Ce véhicule n'est plus disponible ou n'existe pas."}
+        </p>
+        <Button className="mt-6" asChild>
+          <Link href="/cars">
+            {locale === "ar" ? "العودة إلى القائمة" : "Retour aux voitures"}
+          </Link>
+        </Button>
       </div>
     );
   }

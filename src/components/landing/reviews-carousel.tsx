@@ -16,59 +16,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { FeaturedReview } from "@/lib/api";
 
-const FALLBACK_REVIEWS: FeaturedReview[] = [
-  {
-    id: "fallback-1",
-    clientName: "Amine B.",
-    agencyName: "Auto Prestige Tunis",
-    rating: 5,
-    comment:
-      "Service impeccable ! La voiture était en parfait état et l'agence très professionnelle. Je recommande vivement TunRent.",
-    governorate: "Tunis",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "fallback-2",
-    clientName: "Sarah M.",
-    agencyName: "Sousse Location",
-    rating: 4.5,
-    comment:
-      "Réservation facile en ligne, récupération rapide à l'aéroport. Prix transparent, sans surprise.",
-    governorate: "Sousse",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "fallback-3",
-    clientName: "Karim T.",
-    agencyName: "Sfax Auto Rent",
-    rating: 5,
-    comment:
-      "Troisième location via TunRent et toujours aussi satisfait. Le support répond rapidement.",
-    governorate: "Sfax",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "fallback-4",
-    clientName: "Leila H.",
-    agencyName: "Nabeul Cars",
-    rating: 4,
-    comment:
-      "Parfait pour nos vacances à Hammamet. Large choix de véhicules et agences sérieuses.",
-    governorate: "Nabeul",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "fallback-5",
-    clientName: "Mohamed A.",
-    agencyName: "Djerba Mobility",
-    rating: 5,
-    comment:
-      "Location d'un SUV pour explorer le sud tunisien. Processus simple, agence flexible.",
-    governorate: "Médenine",
-    createdAt: new Date().toISOString(),
-  },
-];
-
 const AVATAR_GRADIENTS = [
   "from-[#1e3a5f] to-[#3b82f6]",
   "from-[#0f766e] to-[#2dd4bf]",
@@ -153,10 +100,7 @@ export function ReviewsCarousel({ reviews: initialReviews }: ReviewsCarouselProp
   const [selectedIndex, setSelectedIndex] = useState(0);
 
   const reviews = useMemo(
-    () =>
-      initialReviews && initialReviews.length > 0
-        ? initialReviews
-        : FALLBACK_REVIEWS,
+    () => (initialReviews && initialReviews.length > 0 ? initialReviews : []),
     [initialReviews],
   );
 
@@ -183,6 +127,10 @@ export function ReviewsCarousel({ reviews: initialReviews }: ReviewsCarouselProp
       emblaApi.off("select", onSelect);
     };
   }, [emblaApi]);
+
+  if (reviews.length === 0) {
+    return null;
+  }
 
   const avgRating =
     reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
