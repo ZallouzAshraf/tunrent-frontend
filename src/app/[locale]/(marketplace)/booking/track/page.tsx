@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslations, useLocale } from "next-intl";
@@ -34,12 +34,6 @@ function BookingTrackContent() {
   const [submitted, setSubmitted] = useState(
     !!(searchParams.get("ref") && searchParams.get("email")),
   );
-
-  useEffect(() => {
-    if (searchParams.get("ref") && searchParams.get("email")) {
-      setSubmitted(true);
-    }
-  }, [searchParams]);
 
   const { data, isLoading, isError, refetch } = useQuery({
     queryKey: ["booking-track", reference, email],
