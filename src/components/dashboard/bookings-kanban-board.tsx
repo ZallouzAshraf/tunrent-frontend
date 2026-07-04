@@ -178,9 +178,11 @@ function BookingsKanbanSkeleton() {
 export function BookingsKanbanBoard({
   bookings,
   isLoading,
+  headerAction,
 }: {
   bookings: Booking[];
   isLoading?: boolean;
+  headerAction?: React.ReactNode;
 }) {
   const getByStatus = (status: BookingStatus) =>
     bookings.filter((b) => b.status === status);
@@ -196,6 +198,7 @@ export function BookingsKanbanBoard({
       <DashboardPageHeader
         title="Réservations"
         description="Suivez le cycle de vie de chaque location en un coup d'œil"
+        action={headerAction}
       />
 
       {!isLoading && (

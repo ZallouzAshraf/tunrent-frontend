@@ -88,6 +88,7 @@ export function CarsSearchToolbar({
   const [draftGov, setDraftGov] = useState(filters.governorate ?? "");
   const [draftStart, setDraftStart] = useState(filters.start_date ?? today);
   const [draftEnd, setDraftEnd] = useState(filters.end_date ?? defaultEnd);
+  const [draftSearch, setDraftSearch] = useState(filters.search ?? "");
   const [draftStartTime, setDraftStartTime] = useState("10:00");
   const [draftEndTime, setDraftEndTime] = useState("10:00");
 
@@ -95,7 +96,8 @@ export function CarsSearchToolbar({
     setDraftGov(filters.governorate ?? "");
     setDraftStart(filters.start_date ?? today);
     setDraftEnd(filters.end_date ?? defaultEnd);
-  }, [filters.governorate, filters.start_date, filters.end_date, today, defaultEnd]);
+    setDraftSearch(filters.search ?? "");
+  }, [filters.governorate, filters.start_date, filters.end_date, filters.search, today, defaultEnd]);
 
   const fmtDate = (d: string) =>
     format(new Date(d), "d MMM yyyy", { locale: locale === "ar" ? ar : fr });
@@ -169,6 +171,7 @@ export function CarsSearchToolbar({
       governorate: draftGov || undefined,
       start_date: draftStart || undefined,
       end_date: draftEnd || undefined,
+      search: draftSearch.trim() || undefined,
     });
   };
 
@@ -201,7 +204,17 @@ export function CarsSearchToolbar({
   return (
     <div className="sticky top-16 z-30 border-b bg-background shadow-sm">
       <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6 lg:px-8">
-        <form onSubmit={handleSearchSubmit} className="pt-1">
+        <form onSubmit={handleSearchSubmit} className="space-y-2 pt-1">
+          <div className="relative">
+            <Search className="absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <input
+              type="search"
+              value={draftSearch}
+              onChange={(e) => setDraftSearch(e.target.value)}
+              placeholder={t("searchPlaceholder")}
+              className="h-11 w-full rounded-xl border border-muted-foreground/20 bg-muted/30 ps-9 pe-4 text-sm outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+            />
+          </div>
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-[minmax(0,1.25fr)_minmax(0,1fr)_minmax(0,1fr)_auto] lg:items-stretch">
             <SearchToolbarLocationField
               label={t("pickupLocation")}

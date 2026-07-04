@@ -294,6 +294,16 @@ export interface StatsOverview {
   occupancyRate: number;
 }
 
+export interface PublicCarAvailability {
+  carId: string;
+  minRentalDays: number;
+  unavailableRanges: Array<{
+    start: string;
+    end: string;
+    type: "booking" | "block";
+  }>;
+}
+
 export interface MarketplaceCarSearchParams {
   governorate?: string;
   category?: string;

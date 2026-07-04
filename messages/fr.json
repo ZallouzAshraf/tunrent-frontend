@@ -488,6 +488,7 @@
       "badge2": "Paiement flexible",
       "badge3": "24 gouvernorats",
       "searchGovernorate": "Gouvernorat",
+      "searchPlaceholder": "Marque, modèle, mot-clé…",
       "searchStartDate": "Date de début",
       "searchEndDate": "Date de fin",
       "searchCta": "Chercher",

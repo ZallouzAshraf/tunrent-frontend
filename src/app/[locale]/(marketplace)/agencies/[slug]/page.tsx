@@ -8,7 +8,10 @@ import { MapPin, Phone, Mail } from "lucide-react";
 import { Link } from "@/i18n/routing";
 import { marketplaceApi } from "@/lib/api";
 import { CarCard } from "@/components/marketplace/car-card";
+import { PublicReviewsSection } from "@/components/marketplace/public-reviews-section";
 import { StarRating } from "@/components/shared/star-rating";
+import { LocationMap } from "@/components/shared/location-map";
+import type { MapMarker } from "@/components/shared/location-map";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { GOVERNORATE_LABELS } from "@/lib/constants/governorates";
@@ -44,6 +47,16 @@ export default function AgencyDetailPage({ params }: AgencyDetailPageProps) {
   const governorateLabel = agency.governorate
     ? GOVERNORATE_LABELS[agency.governorate as Governorate]?.[locale]
     : null;
+
+  const mapMarkers: MapMarker[] = [];
+  if (agency.latitude != null && agency.longitude != null) {
+    mapMarkers.push({
+      id: agency.id,
+      latitude: Number(agency.latitude),
+      longitude: Number(agency.longitude),
+      label: agency.name,
+    });
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -118,6 +131,17 @@ export default function AgencyDetailPage({ params }: AgencyDetailPageProps) {
           </div>
         )}
       </section>
+
+      {mapMarkers.length > 0 && (
+        <section className="mt-12">
+          <h2 className="mb-4 text-xl font-semibold">
+            {locale === "ar" ? "الموقع" : "Localisation"}
+          </h2>
+          <LocationMap markers={mapMarkers} className="h-72 w-full rounded-xl border" />
+        </section>
+      )}
+
+      <PublicReviewsSection agencyId={agency.id} />
     </div>
   );
 }

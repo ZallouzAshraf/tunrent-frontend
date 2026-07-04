@@ -22,6 +22,10 @@ import { Link } from "@/i18n/routing";
 import { marketplaceApi } from "@/lib/api";
 import { StarRating } from "@/components/shared/star-rating";
 import { BookingWidget } from "@/components/marketplace/booking-widget";
+import { CarAvailabilityCalendar } from "@/components/marketplace/car-availability-calendar";
+import { PublicReviewsSection } from "@/components/marketplace/public-reviews-section";
+import { LocationMap } from "@/components/shared/location-map";
+import type { MapMarker } from "@/components/shared/location-map";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -87,6 +91,29 @@ function CarDetailContent({ params }: CarDetailPageProps) {
 
   const defaultStart = searchParams.get("start_date") ?? searchParams.get("start") ?? undefined;
   const defaultEnd = searchParams.get("end_date") ?? searchParams.get("end") ?? undefined;
+
+  const mapMarkers: MapMarker[] = [];
+  if (car.pickupLocations?.length) {
+    car.pickupLocations.forEach((loc, index) => {
+      const latitude = loc.latitude ?? loc.lat;
+      const longitude = loc.longitude ?? loc.lng;
+      if (latitude != null && longitude != null) {
+        mapMarkers.push({
+          id: `pickup-${index}`,
+          latitude: Number(latitude),
+          longitude: Number(longitude),
+          label: loc.name ?? loc.address ?? loc.city ?? "",
+        });
+      }
+    });
+  } else if (car.agency?.latitude != null && car.agency?.longitude != null) {
+    mapMarkers.push({
+      id: "agency",
+      latitude: Number(car.agency.latitude),
+      longitude: Number(car.agency.longitude),
+      label: car.agency.name,
+    });
+  }
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-8 pb-28 sm:px-6 lg:px-8 lg:pb-8">
@@ -254,10 +281,24 @@ function CarDetailContent({ params }: CarDetailPageProps) {
         </div>
 
         <div className="hidden lg:col-span-1 lg:block">
-          <div className="sticky top-24">
+          <div className="sticky top-24 space-y-6">
             <BookingWidget car={car} defaultStart={defaultStart} defaultEnd={defaultEnd} />
+            <CarAvailabilityCalendar carId={carId} />
           </div>
         </div>
+      </div>
+
+      <div className="mt-10 space-y-10">
+        <CarAvailabilityCalendar carId={carId} className="lg:hidden" />
+        <PublicReviewsSection carId={carId} />
+        {mapMarkers.length > 0 && (
+          <section>
+            <h2 className="mb-4 text-lg font-semibold">
+              {locale === "ar" ? "موقع الاستلام" : "Lieux de prise en charge"}
+            </h2>
+            <LocationMap markers={mapMarkers} className="h-72 w-full rounded-xl border" />
+          </section>
+        )}
       </div>
 
       <div className="fixed inset-x-0 bottom-0 z-30 border-t bg-background p-4 lg:hidden">

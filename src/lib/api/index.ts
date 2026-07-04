@@ -12,6 +12,7 @@ import type {
   PaginatedResult,
   Payment,
   PublicBookingStatus,
+  PublicCarAvailability,
   Review,
   StatsOverview,
   User,
@@ -97,6 +98,22 @@ export const marketplaceApi = {
 
   getFeaturedReviews: () =>
     apiClient.get<FeaturedReview[]>("/marketplace/reviews/featured"),
+
+  getReviews: (params?: {
+    carId?: string;
+    agencyId?: string;
+    page?: number;
+    limit?: number;
+  }) => apiClient.get<PaginatedResult<Review>>("/marketplace/reviews", { params }),
+
+  getCarAvailability: (
+    carId: string,
+    params?: { from?: string; to?: string },
+  ) =>
+    apiClient.get<PublicCarAvailability>(
+      `/marketplace/cars/${carId}/availability`,
+      { params },
+    ),
 };
 
 // Public (landing)
@@ -190,6 +207,8 @@ export const dashboardApi = {
   // Bookings
   getBookings: (params?: Record<string, unknown>) =>
     apiClient.get<PaginatedResult<Booking>>("/dashboard/bookings", { params }),
+  createBooking: (data: Record<string, unknown>) =>
+    apiClient.post<Booking>("/dashboard/bookings", data),
   getBooking: (id: string) =>
     apiClient.get<Booking>(`/dashboard/bookings/${id}`),
   getCalendar: () =>
