@@ -27,6 +27,7 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { clientApi, getErrorMessage } from "@/lib/api";
+import { ClientReviewForm } from "@/components/account/client-review-form";
 import { formatDate, formatPrice } from "@/lib/utils";
 import { BookingStatus } from "@/types";
 
@@ -66,6 +67,9 @@ export default function AccountBookingDetailPage({
     booking &&
     (booking.status === BookingStatus.PENDING ||
       booking.status === BookingStatus.CONFIRMED);
+
+  const canReview =
+    booking?.status === BookingStatus.COMPLETED && !booking.review;
 
   if (isLoading) return <Skeleton className="h-96 w-full" />;
 
@@ -167,6 +171,44 @@ export default function AccountBookingDetailPage({
           </CardContent>
         </Card>
       </div>
+
+      {canReview && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Laisser un avis</CardTitle>
+            <CardDescription>
+              Votre location est terminée — aidez les autres locataires
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ClientReviewForm
+              bookingId={booking.id}
+              onSuccess={() => {
+                queryClient.invalidateQueries({
+                  queryKey: ["client", "bookings", id],
+                });
+                queryClient.invalidateQueries({ queryKey: ["client", "reviews"] });
+              }}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {booking.review && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Votre avis</CardTitle>
+            <CardDescription>
+              Note globale : {booking.review.ratingOverall}/5
+            </CardDescription>
+          </CardHeader>
+          {booking.review.comment && (
+            <CardContent>
+              <p className="text-sm">{booking.review.comment}</p>
+            </CardContent>
+          )}
+        </Card>
+      )}
 
       {canCancel && (
         <Card className="border-accent/30">

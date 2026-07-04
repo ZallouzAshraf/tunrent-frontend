@@ -10,6 +10,7 @@ import {
 import { DashboardTopbar } from "@/components/dashboard/topbar";
 import { canAccessRoute } from "@/lib/constants/permissions";
 import { useAuth } from "@/lib/auth/use-auth";
+import { RoleGlobal } from "@/types";
 
 export default function DashboardLayout({
   children,
@@ -18,13 +19,21 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
-  const { isLoading, isAuthenticated, isDashboard, agencyRole } = useAuth();
+  const { isLoading, isAuthenticated, isDashboard, agencyRole, user } = useAuth();
+  const isAcceptInvitation = pathname.includes("/dashboard/accept-invitation");
 
   useEffect(() => {
     if (isLoading) return;
 
     if (!isAuthenticated) {
       router.replace("/login?redirect=/dashboard");
+      return;
+    }
+
+    if (isAcceptInvitation) return;
+
+    if (user?.roleGlobal === RoleGlobal.SUPER_ADMIN) {
+      router.replace("/admin");
       return;
     }
 
@@ -36,13 +45,21 @@ export default function DashboardLayout({
     if (!canAccessRoute(pathname, agencyRole ?? undefined)) {
       router.replace("/dashboard");
     }
-  }, [isLoading, isAuthenticated, isDashboard, pathname, agencyRole, router]);
+  }, [isLoading, isAuthenticated, isDashboard, isAcceptInvitation, user?.roleGlobal, pathname, agencyRole, router]);
 
   if (isLoading) {
     return <AuthSpinner />;
   }
 
-  if (!isAuthenticated || !isDashboard) {
+  if (!isAuthenticated) {
+    return <AuthSpinner />;
+  }
+
+  if (isAcceptInvitation) {
+    return <>{children}</>;
+  }
+
+  if (!isDashboard) {
     return <AuthSpinner />;
   }
 

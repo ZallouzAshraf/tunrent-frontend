@@ -35,6 +35,7 @@ import {
   useAuthContext,
 } from "@/lib/auth/auth-context";
 import { decodeJwtPayload } from "@/lib/auth/jwt";
+import { resolvePostLoginPath } from "@/lib/auth/post-login-redirect";
 import {
   dashboardLoginSchema,
   loginSchema,
@@ -131,7 +132,13 @@ function ClientLoginForm({ redirectTo }: { redirectTo: string }) {
       setAgencyId(null);
       await queryClient.invalidateQueries({ queryKey: ["me"] });
       toast.success(t("loginSuccess"));
-      redirectAfterLogin(redirectTo || "/account");
+      redirectAfterLogin(
+        resolvePostLoginPath({
+          roleGlobal: res.data.user.roleGlobal,
+          agencyId: res.data.agencyId,
+          redirectTo,
+        }),
+      );
     } catch (err) {
       if (isEmailNotVerifiedError(err)) {
         toast.error(t("verifyRequired"));
@@ -239,7 +246,13 @@ function DashboardLoginForm({ redirectTo }: { redirectTo: string }) {
     setAgencyId(resolvedAgencyId);
     await queryClient.invalidateQueries({ queryKey: ["me"] });
     toast.success(t("dashboardLoginSuccess"));
-    redirectAfterLogin(redirectTo || "/dashboard");
+    redirectAfterLogin(
+      resolvePostLoginPath({
+        roleGlobal: payload.user?.roleGlobal ?? decodeJwtPayload(payload.access_token).role,
+        agencyId: resolvedAgencyId,
+        redirectTo,
+      }),
+    );
   };
 
   const onSubmit = async (data: DashboardLoginForm) => {

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import { useRouter } from "@/i18n/routing";
 import { AccountSidebar } from "@/components/account/sidebar";
 import { useAuth } from "@/lib/auth/use-auth";
+import { RoleGlobal } from "@/types";
 
 export default function AccountLayout({
   children,
@@ -11,7 +12,7 @@ export default function AccountLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { isLoading, isAuthenticated, isDashboard } = useAuth();
+  const { isLoading, isAuthenticated, isDashboard, user } = useAuth();
 
   useEffect(() => {
     if (isLoading) return;
@@ -21,16 +22,21 @@ export default function AccountLayout({
       return;
     }
 
+    if (user?.roleGlobal === RoleGlobal.SUPER_ADMIN) {
+      router.replace("/admin");
+      return;
+    }
+
     if (isDashboard) {
       router.replace("/dashboard");
     }
-  }, [isLoading, isAuthenticated, isDashboard, router]);
+  }, [isLoading, isAuthenticated, isDashboard, user?.roleGlobal, router]);
 
   if (isLoading) {
     return <AuthSpinner />;
   }
 
-  if (!isAuthenticated || isDashboard) {
+  if (!isAuthenticated || isDashboard || user?.roleGlobal === RoleGlobal.SUPER_ADMIN) {
     return <AuthSpinner />;
   }
 

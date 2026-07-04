@@ -176,6 +176,7 @@ export interface Booking {
   car?: Car;
   agency?: Agency;
   payments?: Payment[];
+  review?: Review;
 }
 
 export interface PublicBookingStatus {
@@ -272,6 +273,15 @@ export interface PlanChangeRequest {
   updatedAt: string;
   agency?: Agency;
   requestedBy?: User;
+}
+
+export interface PlatformStats {
+  totalUsers: number;
+  totalAgencies: number;
+  agenciesByStatus: Record<string, number>;
+  totalCars: number;
+  totalBookings: number;
+  pendingAgencies: number;
 }
 
 export interface StatsOverview {

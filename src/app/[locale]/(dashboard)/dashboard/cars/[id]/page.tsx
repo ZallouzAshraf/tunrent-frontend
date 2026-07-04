@@ -7,6 +7,7 @@ import { Link } from "@/i18n/routing";
 import { CarFormWizard } from "@/components/dashboard/car-form-wizard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { dashboardApi } from "@/lib/api";
+import { normalizePickupLocationsForForm } from "@/lib/pickup-location";
 
 export default function EditCarPage({
   params,
@@ -75,7 +76,7 @@ export default function EditCarPage({
           minDriverAge: car.minDriverAge,
           photos: car.photos,
           thumbnailUrl: car.thumbnailUrl,
-          pickupLocations: car.pickupLocations,
+          pickupLocations: normalizePickupLocationsForForm(car.pickupLocations),
         }}
       />
     </div>

@@ -16,6 +16,7 @@ import type {
   StatsOverview,
   User,
   PlanChangeRequest,
+  PlatformStats,
 } from "@/types";
 
 // Auth
@@ -104,6 +105,14 @@ export const clientApi = {
   markNotificationRead: (id: string) =>
     apiClient.patch<Notification>(`/client/notifications/${id}/read`),
   getReviews: () => apiClient.get<Review[]>("/client/reviews"),
+  createReview: (data: {
+    bookingId: string;
+    ratingOverall: number;
+    ratingCarCondition?: number;
+    ratingService?: number;
+    ratingValue?: number;
+    comment?: string;
+  }) => apiClient.post<Review>("/client/reviews", data),
 };
 
 // Agencies
@@ -236,6 +245,55 @@ export const dashboardApi = {
       "/dashboard/stats/cars",
       { params: { limit } },
     ),
+};
+
+// Team
+export const teamApi = {
+  acceptInvitation: (token: string) =>
+    apiClient.post<{ message: string }>("/team/accept-invitation", { token }),
+};
+
+// Admin
+export const adminApi = {
+  getStats: () => apiClient.get<PlatformStats>("/admin/stats"),
+
+  getAgencies: (params?: {
+    status?: string;
+    search?: string;
+    page?: number;
+    limit?: number;
+  }) => apiClient.get<PaginatedResult<Agency>>("/admin/agencies", { params }),
+
+  getAgency: (id: string) => apiClient.get<Agency>(`/admin/agencies/${id}`),
+
+  approveAgency: (id: string) =>
+    apiClient.patch<Agency>(`/admin/agencies/${id}/approve`),
+
+  rejectAgency: (id: string, reason: string) =>
+    apiClient.patch<Agency>(`/admin/agencies/${id}/reject`, { reason }),
+
+  suspendAgency: (id: string) =>
+    apiClient.patch<Agency>(`/admin/agencies/${id}/suspend`),
+
+  getUsers: (params?: { search?: string; page?: number; limit?: number }) =>
+    apiClient.get<PaginatedResult<User>>("/admin/users", { params }),
+
+  getPlanRequests: (params?: {
+    status?: string;
+    page?: number;
+    limit?: number;
+  }) =>
+    apiClient.get<PaginatedResult<PlanChangeRequest>>("/admin/plan-requests", {
+      params,
+    }),
+
+  approvePlanRequest: (id: string) =>
+    apiClient.patch<PlanChangeRequest>(`/admin/plan-requests/${id}/approve`),
+
+  rejectPlanRequest: (id: string, adminNote?: string) =>
+    apiClient.patch<PlanChangeRequest>(`/admin/plan-requests/${id}/reject`, {
+      adminNote,
+    }),
 };
 
 // Uploads

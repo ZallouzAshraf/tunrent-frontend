@@ -1,4 +1,7 @@
+import { RoleGlobal } from "@/types";
+
 export function decodeJwtPayload(token: string): {
+  role?: string;
   agencyId?: string;
   agencyRole?: string;
 } {
@@ -8,10 +11,19 @@ export function decodeJwtPayload(token: string): {
     const json = atob(base64);
     const payload = JSON.parse(json);
     return {
+      role: payload.role,
       agencyId: payload.agencyId,
       agencyRole: payload.agencyRole,
     };
   } catch {
     return {};
   }
+}
+
+export function roleFromToken(token: string): string | undefined {
+  return decodeJwtPayload(token).role;
+}
+
+export function isSuperAdminRole(role?: string): boolean {
+  return role === RoleGlobal.SUPER_ADMIN;
 }
