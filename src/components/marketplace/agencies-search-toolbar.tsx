@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { MapPin, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -49,20 +49,6 @@ export function AgenciesSearchToolbar({
   const [draftSort, setDraftSort] = useState<SortOption>(sort);
   const [draftFeatured, setDraftFeatured] = useState(featuredOnly);
 
-  const openDropdown = useCallback(
-    (key: FilterKey) => {
-      if (openFilter === key) {
-        setOpenFilter(null);
-        return;
-      }
-      setDraftGov(governorate);
-      setDraftSort(sort);
-      setDraftFeatured(featuredOnly);
-      setOpenFilter(key);
-    },
-    [openFilter, governorate, sort, featuredOnly],
-  );
-
   const applyDraft = () => {
     if (!openFilter) return;
     switch (openFilter) {
@@ -98,7 +84,16 @@ export function AgenciesSearchToolbar({
 
   const pillProps = (key: FilterKey) => ({
     open: openFilter === key,
-    onOpenChange: () => openDropdown(key),
+    onOpenChange: (next: boolean) => {
+      if (next) {
+        setDraftGov(governorate);
+        setDraftSort(sort);
+        setDraftFeatured(featuredOnly);
+        setOpenFilter(key);
+      } else {
+        setOpenFilter((current) => (current === key ? null : current));
+      }
+    },
     onApply: applyDraft,
     onReset: resetDraft,
   });

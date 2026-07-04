@@ -308,6 +308,7 @@ export interface MarketplaceCarSearchParams {
   has_bluetooth?: boolean;
   has_child_seat?: boolean;
   seats?: number;
+  search?: string;
   sort?: string;
   page?: number;
   limit?: number;

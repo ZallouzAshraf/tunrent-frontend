@@ -8,7 +8,7 @@ import { useRouter } from "@/i18n/routing";
 import { Car, ArrowUpDown } from "lucide-react";
 import { marketplaceApi } from "@/lib/api";
 import { useFiltersStore } from "@/stores/filters-store";
-import { toApiSearchParams, applyClientFilters } from "@/lib/marketplace/filters";
+import { toApiSearchParams } from "@/lib/marketplace/filters";
 import { CarsSearchToolbar } from "@/components/marketplace/cars-search-toolbar";
 import { CarCard } from "@/components/marketplace/car-card";
 import { MarketplacePromoCard } from "@/components/marketplace/marketplace-promo-card";
@@ -74,6 +74,7 @@ function CarsPageContentInner() {
         has_bluetooth: params.has_bluetooth === "true" ? true : undefined,
         has_child_seat: params.has_child_seat === "true" ? true : undefined,
         seats: params.seats ? Number(params.seats) : undefined,
+        search: params.search,
         sort: params.sort ?? "price_asc",
         page: params.page ? Number(params.page) : 1,
       });
@@ -91,10 +92,7 @@ function CarsPageContentInner() {
     placeholderData: (previous) => previous,
   });
 
-  const cars = useMemo(
-    () => applyClientFilters(data?.data ?? [], filters),
-    [data?.data, filters],
-  );
+  const cars = data?.data ?? [];
 
   const rentalDays = useMemo(() => {
     if (!filters.start_date || !filters.end_date) return null;

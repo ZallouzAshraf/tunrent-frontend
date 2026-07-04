@@ -1,9 +1,13 @@
 "use client";
 
-import { useEffect, useRef } from "react";
 import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 
 interface FilterPillProps {
@@ -30,57 +34,48 @@ export function FilterPill({
   panelClassName,
 }: FilterPillProps) {
   const tCommon = useTranslations("common");
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const handleClick = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        onOpenChange(false);
-      }
-    };
-    document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
-  }, [open, onOpenChange]);
 
   return (
-    <div ref={ref} className={cn("relative shrink-0", className)}>
-      <button
-        type="button"
-        onClick={() => onOpenChange(!open)}
-        className={cn(
-          "inline-flex h-10 items-center gap-2 rounded-xl border px-4 text-sm font-medium transition-colors",
-          active
-            ? "border-primary bg-primary/5 text-primary"
-            : "border-border bg-background text-foreground hover:border-muted-foreground/40 hover:bg-muted/40",
-        )}
-      >
-        {label}
-        <ChevronDown
-          className={cn("size-4 opacity-50 transition-transform", open && "rotate-180")}
-        />
-      </button>
-      {open && (
-        <div
+    <Popover open={open} onOpenChange={onOpenChange}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
           className={cn(
-            "absolute start-0 top-full z-50 mt-2 min-w-[260px] rounded-2xl border bg-card p-4 shadow-xl",
-            panelClassName,
+            "inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border px-4 text-sm font-medium transition-colors",
+            active
+              ? "border-primary bg-primary/5 text-primary"
+              : "border-border bg-background text-foreground hover:border-muted-foreground/40 hover:bg-muted/40",
+            className,
           )}
         >
-          {children}
-          {onApply && onReset && (
-            <div className="mt-4 flex gap-2 border-t pt-4">
-              <Button type="button" variant="outline" className="flex-1" onClick={onReset}>
-                {tCommon("reset")}
-              </Button>
-              <Button type="button" className="flex-1 font-semibold" onClick={onApply}>
-                {tCommon("apply")}
-              </Button>
-            </div>
-          )}
-        </div>
-      )}
-    </div>
+          {label}
+          <ChevronDown
+            className={cn(
+              "size-4 opacity-50 transition-transform",
+              open && "rotate-180",
+            )}
+          />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent
+        align="start"
+        sideOffset={8}
+        className={cn("min-w-[260px] p-4", panelClassName)}
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
+        {children}
+        {onApply && onReset && (
+          <div className="mt-4 flex gap-2 border-t pt-4">
+            <Button type="button" variant="outline" className="flex-1" onClick={onReset}>
+              {tCommon("reset")}
+            </Button>
+            <Button type="button" className="flex-1 font-semibold" onClick={onApply}>
+              {tCommon("apply")}
+            </Button>
+          </div>
+        )}
+      </PopoverContent>
+    </Popover>
   );
 }
 

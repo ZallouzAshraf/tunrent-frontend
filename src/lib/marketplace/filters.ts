@@ -1,57 +1,29 @@
 import type { MarketplaceCarSearchParams } from "@/types";
 
-/** Params sent to the marketplace API (backend-supported only). */
+/** Strips empty values before sending to the marketplace API. */
 export function toApiSearchParams(
   filters: MarketplaceCarSearchParams,
 ): MarketplaceCarSearchParams {
-  const {
-    governorate,
-    category,
-    start_date,
-    end_date,
-    min_price,
-    max_price,
-    transmission,
-    has_ac,
-    seats,
-    sort,
-    page,
-    limit,
-  } = filters;
-
-  return {
-    ...(governorate && { governorate }),
-    ...(category && { category }),
-    ...(start_date && { start_date }),
-    ...(end_date && { end_date }),
-    ...(min_price !== undefined && { min_price }),
-    ...(max_price !== undefined && { max_price }),
-    ...(transmission && { transmission }),
-    ...(has_ac !== undefined && { has_ac }),
-    ...(seats && { seats }),
-    ...(sort && { sort }),
-    page: page ?? 1,
-    limit: limit ?? 12,
+  const params: MarketplaceCarSearchParams = {
+    page: filters.page ?? 1,
+    limit: filters.limit ?? 12,
   };
-}
 
-/** Client-side filter for fields not yet supported by the API. */
-export function applyClientFilters<T extends {
-  fuelType?: string;
-  hasGps?: boolean;
-  hasBluetooth?: boolean;
-  hasChildSeat?: boolean;
-}>(
-  cars: T[],
-  filters: MarketplaceCarSearchParams,
-): T[] {
-  return cars.filter((car) => {
-    if (filters.fuel_type && car.fuelType !== filters.fuel_type) return false;
-    if (filters.has_gps !== undefined && car.hasGps !== filters.has_gps) return false;
-    if (filters.has_bluetooth !== undefined && car.hasBluetooth !== filters.has_bluetooth)
-      return false;
-    if (filters.has_child_seat !== undefined && car.hasChildSeat !== filters.has_child_seat)
-      return false;
-    return true;
-  });
+  if (filters.governorate) params.governorate = filters.governorate;
+  if (filters.category) params.category = filters.category;
+  if (filters.start_date) params.start_date = filters.start_date;
+  if (filters.end_date) params.end_date = filters.end_date;
+  if (filters.min_price !== undefined) params.min_price = filters.min_price;
+  if (filters.max_price !== undefined) params.max_price = filters.max_price;
+  if (filters.transmission) params.transmission = filters.transmission;
+  if (filters.fuel_type) params.fuel_type = filters.fuel_type;
+  if (filters.has_ac !== undefined) params.has_ac = filters.has_ac;
+  if (filters.has_gps !== undefined) params.has_gps = filters.has_gps;
+  if (filters.has_bluetooth !== undefined) params.has_bluetooth = filters.has_bluetooth;
+  if (filters.has_child_seat !== undefined) params.has_child_seat = filters.has_child_seat;
+  if (filters.seats) params.seats = filters.seats;
+  if (filters.search?.trim()) params.search = filters.search.trim();
+  if (filters.sort) params.sort = filters.sort;
+
+  return params;
 }

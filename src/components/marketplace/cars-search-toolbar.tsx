@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { format, addDays } from "date-fns";
 import { fr, ar } from "date-fns/locale";
@@ -100,18 +100,6 @@ export function CarsSearchToolbar({
   const fmtDate = (d: string) =>
     format(new Date(d), "d MMM yyyy", { locale: locale === "ar" ? ar : fr });
 
-  const openDropdown = useCallback(
-    (key: FilterKey) => {
-      if (openFilter === key) {
-        setOpenFilter(null);
-        return;
-      }
-      setDraft(draftFromFilters(filters));
-      setOpenFilter(key);
-    },
-    [openFilter, filters],
-  );
-
   const applyDraft = () => {
     if (!openFilter) return;
     const patch: Partial<MarketplaceCarSearchParams> = { page: 1 };
@@ -198,7 +186,14 @@ export function CarsSearchToolbar({
 
   const pillProps = (key: FilterKey) => ({
     open: openFilter === key,
-    onOpenChange: () => openDropdown(key),
+    onOpenChange: (next: boolean) => {
+      if (next) {
+        setDraft(draftFromFilters(filters));
+        setOpenFilter(key);
+      } else {
+        setOpenFilter((current) => (current === key ? null : current));
+      }
+    },
     onApply: applyDraft,
     onReset: resetDraft,
   });
