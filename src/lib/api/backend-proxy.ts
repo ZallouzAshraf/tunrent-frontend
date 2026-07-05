@@ -48,6 +48,9 @@ export async function proxyToBackend(
   const target = new URL(`${backendBase}/${path}`);
   target.search = incoming.search;
 
+  const method = request.method.toUpperCase();
+  console.log("[backend-proxy] received", method, path);
+
   const headers = new Headers();
   for (const name of FORWARD_REQUEST_HEADERS) {
     const value = request.headers.get(name);
@@ -56,9 +59,13 @@ export async function proxyToBackend(
     }
   }
 
-  const method = request.method.toUpperCase();
   const hasBody = !["GET", "HEAD"].includes(method);
   const body = hasBody ? await request.arrayBuffer() : undefined;
+
+  console.log("[backend-proxy] forwarding to", target.toString(), {
+    backendBase,
+    hasBackendUrlEnv: Boolean(process.env.BACKEND_URL?.trim()),
+  });
 
   const backendResponse = await fetch(target.toString(), {
     method,
@@ -87,9 +94,21 @@ export async function proxyToBackend(
   // into one invalid string and silently corrupts auth cookies. Fail loudly instead.
   const setCookies = backendResponse.headers.getSetCookie();
 
+  console.log("[backend-proxy] backend response", {
+    status: backendResponse.status,
+    setCookieCountFromBackend: setCookies.length,
+    setCookieNames: setCookies.map((c) => c.split("=")[0]?.trim()),
+  });
+
   for (const cookie of setCookies) {
     responseHeaders.append("Set-Cookie", rewriteSetCookieForProxy(cookie));
   }
+
+  const outgoingSetCookieCount = setCookies.length;
+  console.log("[backend-proxy] returning to browser", {
+    status: backendResponse.status,
+    outgoingSetCookieCount,
+  });
 
   return new Response(backendResponse.body, {
     status: backendResponse.status,
