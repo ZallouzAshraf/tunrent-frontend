@@ -19,10 +19,8 @@ import { Label } from "@/components/ui/label";
 import { authApi } from "@/lib/api";
 import { getErrorMessage, isEmailNotVerifiedError } from "@/lib/api/client";
 import { setAgencyId } from "@/lib/api/client";
-import {
-  setGlobalAccessToken,
-  useAuthContext,
-} from "@/lib/auth/auth-context";
+import { useAuthContext } from "@/lib/auth/auth-context";
+import { storeAccessToken } from "@/lib/auth/session";
 
 const loginSchema = z.object({
   email: z.string().email(),
@@ -84,8 +82,7 @@ export function AuthModal({
   });
 
   const finishAuth = async (accessToken: string) => {
-    setAccessToken(accessToken);
-    setGlobalAccessToken(accessToken);
+    storeAccessToken(accessToken, setAccessToken);
     setAgencyId(null);
     await queryClient.invalidateQueries({ queryKey: ["me"] });
     toast.success(mode === "login" ? "Connexion réussie" : "Compte créé avec succès");

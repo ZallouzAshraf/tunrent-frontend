@@ -1,3 +1,5 @@
+const PROXY_TIMEOUT_MS = 55_000;
+
 const HOP_BY_HOP = new Set([
   "connection",
   "keep-alive",
@@ -22,12 +24,25 @@ const FORWARD_REQUEST_HEADERS = [
   "x-agency-id",
 ] as const;
 
+function logProxy(event: string, data: Record<string, unknown>): void {
+  console.log(JSON.stringify({ scope: "backend-proxy", event, ...data }));
+}
+
 export function getBackendUrl(): string {
-  const url =
-    process.env.BACKEND_URL?.trim() ||
-    process.env.NEXT_PUBLIC_API_URL?.trim() ||
-    "http://localhost:3000";
-  return url.replace(/\/$/, "");
+  const fromEnv = process.env.BACKEND_URL?.trim();
+  if (fromEnv) {
+    return fromEnv.replace(/\/$/, "");
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "[backend-proxy] BACKEND_URL is required in production on Vercel",
+    );
+  }
+
+  const fallback =
+    process.env.NEXT_PUBLIC_API_URL?.trim() || "http://localhost:3000";
+  return fallback.replace(/\/$/, "");
 }
 
 /** Strip Domain= so the browser binds cookies to the frontend host (vercel.app). */
@@ -49,7 +64,7 @@ export async function proxyToBackend(
   target.search = incoming.search;
 
   const method = request.method.toUpperCase();
-  console.log("[backend-proxy] received", method, path);
+  logProxy("request.received", { method, path });
 
   const headers = new Headers();
   for (const name of FORWARD_REQUEST_HEADERS) {
@@ -62,18 +77,46 @@ export async function proxyToBackend(
   const hasBody = !["GET", "HEAD"].includes(method);
   const body = hasBody ? await request.arrayBuffer() : undefined;
 
-  console.log("[backend-proxy] forwarding to", target.toString(), {
-    backendBase,
+  logProxy("request.forward", {
+    method,
+    target: target.toString(),
     hasBackendUrlEnv: Boolean(process.env.BACKEND_URL?.trim()),
   });
 
-  const backendResponse = await fetch(target.toString(), {
-    method,
-    headers,
-    body: body && body.byteLength > 0 ? body : undefined,
-    redirect: "manual",
-    cache: "no-store",
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), PROXY_TIMEOUT_MS);
+
+  let backendResponse: Response;
+  try {
+    backendResponse = await fetch(target.toString(), {
+      method,
+      headers,
+      body: body && body.byteLength > 0 ? body : undefined,
+      redirect: "manual",
+      cache: "no-store",
+      signal: controller.signal,
+    });
+  } catch (error) {
+    const reason =
+      error instanceof Error && error.name === "AbortError"
+        ? "timeout"
+        : "network_error";
+    logProxy("request.failed", { method, path, reason });
+    return new Response(
+      JSON.stringify({
+        message:
+          reason === "timeout"
+            ? "Backend request timed out"
+            : "Backend unreachable",
+      }),
+      {
+        status: reason === "timeout" ? 504 : 502,
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+  } finally {
+    clearTimeout(timeout);
+  }
 
   const responseHeaders = new Headers();
   backendResponse.headers.forEach((value, key) => {
@@ -94,9 +137,9 @@ export async function proxyToBackend(
   // into one invalid string and silently corrupts auth cookies. Fail loudly instead.
   const setCookies = backendResponse.headers.getSetCookie();
 
-  console.log("[backend-proxy] backend response", {
+  logProxy("response.backend", {
     status: backendResponse.status,
-    setCookieCountFromBackend: setCookies.length,
+    setCookieCount: setCookies.length,
     setCookieNames: setCookies.map((c) => c.split("=")[0]?.trim()),
   });
 
@@ -104,10 +147,9 @@ export async function proxyToBackend(
     responseHeaders.append("Set-Cookie", rewriteSetCookieForProxy(cookie));
   }
 
-  const outgoingSetCookieCount = setCookies.length;
-  console.log("[backend-proxy] returning to browser", {
+  logProxy("response.client", {
     status: backendResponse.status,
-    outgoingSetCookieCount,
+    outgoingSetCookieCount: setCookies.length,
   });
 
   return new Response(backendResponse.body, {

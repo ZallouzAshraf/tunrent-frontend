@@ -7,9 +7,12 @@ type RouteContext = { params: Promise<{ path: string[] }> };
 async function handle(request: Request, context: RouteContext) {
   const { path } = await context.params;
   console.log(
-    "[backend-proxy-route] incoming request",
-    request.method,
-    path.join("/"),
+    JSON.stringify({
+      scope: "backend-proxy-route",
+      event: "handler.enter",
+      method: request.method,
+      path: path.join("/"),
+    }),
   );
   return proxyToBackend(request, path);
 }

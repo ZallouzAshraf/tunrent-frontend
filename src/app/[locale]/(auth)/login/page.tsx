@@ -30,10 +30,8 @@ import {
   isEmailNotVerifiedError,
   setAgencyId,
 } from "@/lib/api/client";
-import {
-  setGlobalAccessToken,
-  useAuthContext,
-} from "@/lib/auth/auth-context";
+import { useAuthContext } from "@/lib/auth/auth-context";
+import { storeAccessToken } from "@/lib/auth/session";
 import { decodeJwtPayload } from "@/lib/auth/jwt";
 import { resolvePostLoginPath } from "@/lib/auth/post-login-redirect";
 import {
@@ -127,8 +125,7 @@ function ClientLoginForm({ redirectTo }: { redirectTo: string }) {
   const onSubmit = async (data: LoginForm) => {
     try {
       const res = await authApi.login(data);
-      setAccessToken(res.data.access_token);
-      setGlobalAccessToken(res.data.access_token);
+      storeAccessToken(res.data.access_token, setAccessToken);
       setAgencyId(null);
       await queryClient.invalidateQueries({ queryKey: ["me"] });
       toast.success(t("loginSuccess"));
@@ -241,8 +238,7 @@ function DashboardLoginForm({ redirectTo }: { redirectTo: string }) {
       return;
     }
 
-    setAccessToken(payload.access_token);
-    setGlobalAccessToken(payload.access_token);
+    storeAccessToken(payload.access_token, setAccessToken);
     setAgencyId(resolvedAgencyId);
     await queryClient.invalidateQueries({ queryKey: ["me"] });
     toast.success(t("dashboardLoginSuccess"));

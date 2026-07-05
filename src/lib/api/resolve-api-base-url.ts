@@ -1,10 +1,6 @@
 /**
- * Browser axios always uses the same-origin proxy so auth cookies land on the
- * frontend host (localhost:3001 in dev, vercel.app in prod).
- * Server components use BACKEND_URL via server.ts (not this helper).
- *
- * Set NEXT_PUBLIC_USE_DIRECT_API=true + NEXT_PUBLIC_API_URL only to bypass the
- * proxy (cookies will not work across origins).
+ * Browser API base URL — always same-origin proxy unless explicitly bypassed.
+ * @see docs/AUTH.md
  */
 export function resolveClientApiBaseUrl(): string {
   const useDirect =
@@ -17,3 +13,6 @@ export function resolveClientApiBaseUrl(): string {
 
   return "/api/backend";
 }
+
+/** Resolved at module load for diagnostics (visible in browser devtools via network URL). */
+export const CLIENT_API_BASE_URL = resolveClientApiBaseUrl();

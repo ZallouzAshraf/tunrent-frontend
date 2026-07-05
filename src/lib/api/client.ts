@@ -1,18 +1,19 @@
 import axios, { type AxiosError, type InternalAxiosRequestConfig } from "axios";
-import {
-  getGlobalAccessToken,
-  setGlobalAccessToken,
-} from "@/lib/auth/auth-context";
 import { resolveClientApiBaseUrl } from "@/lib/api/resolve-api-base-url";
+import {
+  getAccessToken,
+  refreshAccessToken,
+  storeAccessToken,
+} from "@/lib/auth/session";
 
 export const apiClient = axios.create({
   baseURL: resolveClientApiBaseUrl(),
   headers: { "Content-Type": "application/json" },
   withCredentials: true,
+  timeout: 60_000,
 });
 
 let agencyId: string | null = null;
-let refreshPromise: Promise<string | null> | null = null;
 
 export function setAgencyId(id: string | null) {
   agencyId = id;
@@ -23,7 +24,7 @@ export function getAgencyId() {
 }
 
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  const token = getGlobalAccessToken();
+  const token = getAccessToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -49,28 +50,15 @@ apiClient.interceptors.response.use(
     ) {
       original._retry = true;
 
-      refreshPromise ??= apiClient
-        .post<{ access_token: string }>("/auth/refresh")
-        .then((res) => {
-          const token = res.data.access_token;
-          setGlobalAccessToken(token);
-          return token;
-        })
-        .catch(() => {
-          setGlobalAccessToken(null);
-          if (typeof window !== "undefined") {
-            window.location.assign("/login");
-          }
-          return null;
-        })
-        .finally(() => {
-          refreshPromise = null;
-        });
-
-      const newToken = await refreshPromise;
+      const newToken = await refreshAccessToken();
       if (newToken) {
         original.headers.Authorization = `Bearer ${newToken}`;
         return apiClient(original);
+      }
+
+      storeAccessToken(null);
+      if (typeof window !== "undefined") {
+        window.location.assign("/login");
       }
     }
 
@@ -80,6 +68,12 @@ apiClient.interceptors.response.use(
 
 export function getErrorMessage(error: unknown): string {
   if (axios.isAxiosError(error)) {
+    if (error.code === "ECONNABORTED") {
+      return "Le serveur met trop de temps à répondre. Réessayez dans un instant.";
+    }
+    if (!error.response) {
+      return "Impossible de joindre le serveur. Vérifiez votre connexion.";
+    }
     const data = error.response?.data as { message?: string | string[] };
     if (Array.isArray(data?.message)) return data.message.join(", ");
     if (data?.message) return data.message;
