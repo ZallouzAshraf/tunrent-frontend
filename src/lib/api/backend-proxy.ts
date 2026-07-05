@@ -9,6 +9,8 @@ const HOP_BY_HOP = new Set([
   "upgrade",
   "host",
   "content-length",
+  // fetch() decompresses gzip/br bodies; forwarding Content-Encoding breaks the browser.
+  "content-encoding",
 ]);
 
 const FORWARD_REQUEST_HEADERS = [
